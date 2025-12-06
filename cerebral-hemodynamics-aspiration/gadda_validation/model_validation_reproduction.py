@@ -1,11 +1,9 @@
-# Imports moved to top for best practice
 import numpy as np
 import matplotlib.pyplot as plt
 def stenosis_patterns_pvs_analysis():
 	"""
-	Analyze the effects of different venous stenosis patterns (A, B, C, D) on intracranial pressure (ICP) and venous sinus pressure (Pvs).
+	Analyze the effects of different venous stenosis patterns on intracranial pressure (ICP) and venous sinus pressure (Pvs).
 	Simulates both complete blockage (Gx=0) and halved conductance (Gx/2) for each pattern in supine and upright postures.
-	Generates bar plots and summary tables for all results.
 	"""
 	print("\n" + "="*70)
 	print("STENOTIC PATTERNS ANALYSIS: ICP and Pvs")
