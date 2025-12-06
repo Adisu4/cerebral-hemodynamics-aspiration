@@ -253,6 +253,7 @@ MIT License - See LICENSE file for details
 
 
 ## Acknowledgments
+This work was carried out under the supervision of Prof. Majid Jadidi, Department of Biomechanics, University of Nebraska at Omaha. I sincerely appreciate his guidance and support throughout the development of this project.
 
 - Original model: Gadda et al. (2015)
 - Cerebral autoregulation: Ursino & Lodi (1997)
