@@ -23,7 +23,6 @@ This project implements a 15-state ODE system modeling cerebral hemodynamics and
 - Cerebral autoregulation with impairment modeling
 - Starling resistor mechanics for collapsible veins
 - CSF dynamics (formation, absorption, compliance)
-- Venous stenosis modeling (transverse sinus, jugular veins)
 - Aspiration protocol implementation with multiple access sites
 - Adaptive convergence detection for baseline stabilization
 
@@ -105,11 +104,9 @@ params = create_test_parameters('T1')
 
 # Add aspiration protocol
 protocol = AspirationProtocol.create_constant_flow(
-    site='J3',                   # Right jugular J3
-    target_flow_mL_min=60.0,     # 60 mL/min
-    ramp_duration_s=600.0,       # 10-min ramp
-    total_duration_s=1500.0,     # 25-min total
-    catheter_resistance=10.0
+    site='Pv',                   
+    target_flow_mL_min=240.0,     
+    ramp_duration_s=60.0,       
 )
 params.aspiration_protocol = protocol
 
@@ -126,7 +123,7 @@ print(f"Reduction: {baseline.ICP.mean() - intervention.ICP[-1]:.1f} mmHg")
 from aspiration_study.test_cases import run_test_suite
 
 results = run_test_suite(
-    sites=['Pvs', 'Pv', 'J3', 'J2', 'J1'],
+    sites=['Pvs', 'Pv'],
     protocol_type='constant'
 )
 ```
@@ -141,7 +138,7 @@ from adaptive_stabilization import run_two_phase_aspiration_test
 # Run T1 (Mild IIH) with aspiration
 result = run_two_phase_aspiration_test(
     test_case_id='T1',
-    site='J3',
+    site='Pv',
     flow_rate_mL_min=60.0,
     aspiration_duration_s=1500.0
 )
@@ -166,9 +163,7 @@ python plot_aspiration_results.py
 **Aspiration Sites:**
 - **Pvs** - Superior sagittal sinus
 - **Pv** - Confluence of sinuses
-- **J3** - Right internal jugular (J3 level)
-- **J2** - Right internal jugular (J2 level)
-- **J1** - Right internal jugular (J1 level)
+
 
 ## Model Validation
 
@@ -181,16 +176,8 @@ The model has been validated against:
 ## Output Files
 
 All results are saved to:
-- `output/` - CSV files with simulation results
-- `validation_plots/` - Publication-quality figures (PNG)
+- `output/` - Publication-quality figures (PNG)
 
-## Key Findings
-
-- **Therapeutic threshold**: ≥5 mmHg ICP reduction
-- **Optimal flow rates**: 60-90 mL/min (pathology-dependent)
-- **Best sites**: J3/J2 show superior efficacy vs. upstream sites
-- **Safety**: CPP ≥60 mmHg maintained across protocols
-- **Dose-response**: Saturation at high flow rates due to collapsible vein mechanics
 
 ## Model Details
 
@@ -239,7 +226,7 @@ Gadda G, et al. (2015) "A new hemodynamic model shows that temporal venous steno
 
 **Aspiration Extension:**
 If you use the aspiration extension, please cite:
-Mengesha Assefa, A., "Venous Aspiration Protocols for Intracranial Pressure Modulation: Computational Model Extension," University of Nebraska at Omaha, 2025. [In preparation]
+Mengesha Assefa, A., "Venous Aspiration for Intracranial Pressure Management: A Lumped Parameter Modeling," University of Nebraska at Omaha, 2025. [In preparation]
 
 ## License
 
@@ -248,12 +235,16 @@ MIT License - See LICENSE file for details
 ## Contact
 
 **Author:** Adisu Mengesha Assefa  
+**Position:** PhD Student & Graduate Assistant  
+**Institution:** Department of Biomechanics, University of Nebraska at Omaha  
 **Email:** aassefa@unomaha.edu  
-**Institution:** University of Nebraska at Omaha, Department of Biomechanics  
+
 
 
 ## Acknowledgments
+This work was carried out under the supervision of Prof. Majid Jadidi, Department of Biomechanics, University of Nebraska at Omaha. I sincerely appreciate his guidance and support throughout the development of this project.
 
 - Original model: Gadda et al. (2015)
 - Cerebral autoregulation: Ursino & Lodi (1997)
 - CSF dynamics: Marmarou et al. (1975)
+
