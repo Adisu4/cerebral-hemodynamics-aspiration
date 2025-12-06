@@ -203,8 +203,15 @@ print(f"  Therapeutic: {'Yes' if reduction >= 5.0 else 'No'}")
 
 ## Reference
 
-Gadda G, et al. (2015). "A new hemodynamic model for the study of intracranial hypertension." 
-Fluids and Barriers of the CNS, 12:15.
+Gadda G, et al. (2015). "A new hemodynamic model for the study of intracranial hypertension." Fluids and Barriers of the CNS, 12:15.
+Ursino M, Lodi CA. (1997). A simple mathematical model of the interaction between intracranial pressure and cerebral hemodynamics. Journal of Applied Physiology, 82(4):1256–1269.
+Marmarou A, et al. (1975). A nonlinear analysis of the CSF system and intracranial pressure dynamics. Journal of Neurosurgery.
+L. O. Müller and E. F. Toro, “Enhanced global mathematical model for studying cerebral venous blood flow,” J. Biomech., vol. 47, no. 13, pp. 3361–3372, Oct. 2014, doi: 10.1016/j.jbiomech.2014.08.005.
+N. Westerhof, J.-W. Lankhaar, and B. E. Westerhof, “The arterial Windkessel,” Med. Biol. Eng. Comput., vol. 47, no. 2, pp. 131–141, Feb. 2009, doi: 10.1007/s11517-008-0359-2.
+M. Ursino, “A mathematical study of human intracranial hydrodynamics part 1—The cerebrospinal fluid pulse pressure,” Ann. Biomed. Eng., vol. 16, no. 4, pp. 379–401, July 1988, doi: 10.1007/BF02364625. 
+Ghitti, R., Toro, E.F., Müller, L.O.Nonlinear lumped-parameter models for blood flow simulations in networks of vessels. Appl Math Model 108, 270–303 (2022).https://doi.org/10.1016/j.apm.2022.03.013
+
+
 
 ## Notes
 
