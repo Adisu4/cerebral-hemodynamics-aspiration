@@ -248,8 +248,10 @@ MIT License - See LICENSE file for details
 ## Contact
 
 **Author:** Adisu Mengesha Assefa  
+**Role:** PhD Student & Graduate Assistant  
+**Institution:** Department of Biomechanics, University of Nebraska at Omaha  
 **Email:** aassefa@unomaha.edu  
-**Institution:** University of Nebraska at Omaha, Department of Biomechanics  
+
 
 
 ## Acknowledgments
