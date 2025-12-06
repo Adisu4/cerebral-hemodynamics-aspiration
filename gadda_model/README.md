@@ -203,8 +203,14 @@ print(f"  Therapeutic: {'Yes' if reduction >= 5.0 else 'No'}")
 
 ## Reference
 
-Gadda G, et al. (2015). "A new hemodynamic model for the study of intracranial hypertension." 
-Fluids and Barriers of the CNS, 12:15.
+1. Gadda G, et al. (2015). "A new hemodynamic model for the study of intracranial hypertension." Fluids and Barriers of the CNS, 12:15.
+2. M. Ursino and C. A. Lodi, “A simple mathematical model of the interaction between intracranial pressure and cerebral hemodynamics,” J. Appl. Physiol. Bethesda Md 1985, vol. 82, no. 4, pp. 1256–1269, Apr. 1997, doi: 10.1152/jappl.1997.82.4.1256.
+3. L. O. Müller and E. F. Toro, “Enhanced global mathematical model for studying cerebral venous blood flow,” J. Biomech., vol. 47, no. 13, pp. 3361–3372, Oct. 2014, doi: 10.1016/j.jbiomech.2014.08.005.
+4. Ghitti, R., Toro, E.F., Müller, L.O. Nonlinear lumped-parameter models for blood flow simulations in networks of vessels. Appl Math Model 108, 270–303 (2022). https://doi.org/10.1016/j.apm.2022.03.013
+5. N. Westerhof, J.-W. Lankhaar, and B. E. Westerhof, “The arterial Windkessel,” Med. Biol. Eng. Comput., vol. 47, no. 2, pp. 131–141, Feb. 2009, doi: 10.1007/s11517-008-0359-2.
+6. A. Marmarou, K. Shulman, and R. M. Rosende, “A nonlinear analysis of the cerebrospinal fluid  system and intracranial pressure dynamics,” J. Neurosurg., vol. 48, no. 3, pp. 332–344, Mar. 1978,  doi: 10.3171/jns.1978.48.3.0332. 
+7. P. Zamboni et al., “An ultrasound model to calculate the brain blood outflow through collateral vessels: a pilot study,” BMC Neurol., vol. 13, no. 1, p. 81, July 2013, doi: 10.1186/1471-2377-13-81.
+
 
 ## Notes
 
