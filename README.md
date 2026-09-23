@@ -1,250 +1,248 @@
-## Model Validation & Reproduction
+# Cerebral hemodynamics during controlled venous aspiration
 
-To reproduce all validation analyses (baseline, posture, sensitivity, stenosis, mass balance) as in the original Gadda et al. (2015) paper, run:
+A lumped-parameter model of intracranial pressure (ICP), cerebral circulation,
+extracranial venous drainage, and controlled venous aspiration. The model is
+adapted from published cerebral and venous hemodynamics literature and examines
+how aspiration location and flow rate affect ICP in a constructed TBI-like
+parameter state.
 
-```bash
-python -m gadda_validation.model_validation_reproduction
-```
-
-This must be run from the root of the repository (the folder containing `gadda_model/` and `gadda_validation/`).
-
-This will print all results and generate plots matching the original validation script. If you see `ModuleNotFoundError: No module named 'gadda_model'`, make sure you are running from the root and using the `-m` flag as shown above.
-
-# Intracranial Pressure Model with Venous Aspiration
-
-A computational model of intracranial pressure (ICP) dynamics and cerebral venous outflow with venous aspiration capabilities, adapted from published venous hemodynamics literature.
+> This is a computational research model. It has not been validated for patient
+> treatment, device operation, or clinical decision-making.
 
 ## Overview
 
-This project implements a 15-state ODE system modeling cerebral hemodynamics and evaluates venous aspiration as a therapeutic intervention for elevated ICP in conditions like Idiopathic Intracranial Hypertension (IIH) and traumatic brain injury (TBI).
+The model contains 14 dynamic states representing intracranial and
+extracranial pressures together with cerebral autoregulation. Pial arterial
+compliance is calculated from the autoregulatory state rather than integrated
+as an additional state.
 
-**Key Features:**
-- Multi-compartment cerebral circulation model (arterial, capillary, venous, CSF)
-- Cerebral autoregulation with impairment modeling
-- Starling resistor mechanics for collapsible veins
-- CSF dynamics (formation, absorption, compliance)
-- Aspiration protocol implementation with multiple access sites
-- Adaptive convergence detection for baseline stabilization
+Key features include:
+
+- intracranial arterial, capillary, venous, and cerebrospinal-fluid dynamics;
+- bilateral jugular, vertebral, collateral, azygos, and caval pathways;
+- pressure-dependent jugular conductance;
+- cerebral autoregulation and pressure-dependent intracranial compliance;
+- aspiration at the cerebral-vein, venous-sinus, J3, and J2 nodes;
+- matched baseline and intervention simulations;
+- explicit convergence tests and terminal-window averaging; and
+- dose-response, site-comparison, reinfusion, solver, and sensitivity analyses.
+
+Only the supine configuration is implemented. Primary aspiration is modeled as
+external withdrawal. Reinfusion is evaluated as a separate comparator.
+
+## Reference reproduction
+
+The reference parameter set reproduces selected **supine baseline** pressures
+and flows reported by Gadda et al. (2015). This is an implementation-
+reproduction check, not independent biological validation of the aspiration
+model. Upright posture is not included in the maintained implementation.
+
+The repository retains the exact result-producing source and its SHA-256
+manifest under `reference_implementation/`. Regression tests compare the
+maintained modules with that archived implementation and verify every saved run
+report.
 
 ## Installation
 
-### Prerequisites
-- Python 3.7+
-- NumPy, SciPy, Matplotlib
-
-### Setup
+Python 3.10–3.13 is supported.
 
 ```bash
-# Clone the repository
-git clone https://github.com/adisumengesha/cerebral-hemodynamics-aspiration.git
+git clone https://github.com/Adisu4/cerebral-hemodynamics-aspiration.git
 cd cerebral-hemodynamics-aspiration
 
-# Create virtual environment (recommended)
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Install dependencies
-pip install -r requirements.txt
+# Linux or macOS
+source .venv/bin/activate
 
-# Install package in development mode
-pip install -e .
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+
+python -m pip install -e ".[test,visualization]"
+python -m pytest
 ```
 
-## Quick Start
+## Quick start
 
-### Run Aspiration Simulations
-```bash
-python adaptive_stabilization.py
-```
-
-### Generate Publication Figures
-```bash
-python plot_aspiration_results.py
-```
-
-## Project Structure
-
-```
-├── gadda_model/              # Core model package
-│   ├── equations.py          # ODE system (15 states)
-│   ├── parameters.py         # Model parameters
-│   ├── solver.py             # Numerical integration
-│   └── aspiration.py         # Aspiration protocol management
-├── aspiration_study/         # Clinical test cases
-│   └── test_cases.py         # Phenotypes T0–T3 and test suite helpers
-├── gadda_validation/         # Model validation
-│   ├── supine_upright.py     # Posture change validation
-│   ├── stenosis_patterns.py  # Venous obstruction patterns
-│   └── sensitivity_analysis.py # Parameter sensitivity
-├── adaptive_stabilization.py # Main simulation runner with convergence detection
-└── plot_aspiration_results.py # Generate figures for aspiration studies
-```
-
-## Usage Examples
-
-### 1. Baseline ICP Simulation
-
-```python
-from gadda_model import ModelParameters, run_simulation
-
-# Healthy baseline
-params = ModelParameters(posture='supine')
-result = run_simulation(params, duration_s=900)
-print(f"ICP: {result.ICP.mean():.1f} mmHg")
-```
-
-### 2. IIH Pathology with Aspiration
-
-```python
-from aspiration_study.test_cases import create_test_parameters
-from gadda_model import AspirationProtocol, run_full_protocol
-
-# Create T1 (Mild IIH) parameters
-params = create_test_parameters('T1')
-
-# Add aspiration protocol
-protocol = AspirationProtocol.create_constant_flow(
-    site='Pv',                   
-    target_flow_mL_min=240.0,     
-    ramp_duration_s=60.0,       
-)
-params.aspiration_protocol = protocol
-
-# Run baseline + intervention
-baseline, intervention = run_full_protocol(params)
-print(f"Baseline ICP: {baseline.ICP.mean():.1f} mmHg")
-print(f"Final ICP: {intervention.ICP[-1]:.1f} mmHg")
-print(f"Reduction: {baseline.ICP.mean() - intervention.ICP[-1]:.1f} mmHg")
-```
-
-### 3. Multi-Site Comparison (built into test suite)
-
-```python
-from aspiration_study.test_cases import run_test_suite
-
-results = run_test_suite(
-    sites=['Pvs', 'Pv'],
-    protocol_type='constant'
-)
-```
-
-## Running Simulations
-
-### Adaptive Stabilization (Main Simulation Runner)
-
-```python
-from adaptive_stabilization import run_two_phase_aspiration_test
-
-# Run T1 (Mild IIH) with aspiration
-result = run_two_phase_aspiration_test(
-    test_case_id='T1',
-    site='Pv',
-    flow_rate_mL_min=60.0,
-    aspiration_duration_s=1500.0
-)
-```
-
-### Generate Plots
+Run the predefined baseline, dose-response, site-comparison, and sensitivity
+experiments:
 
 ```bash
-# Generate all publication figures (T1 and T2 results)
-python plot_aspiration_results.py
+cerebral-hemodynamics-run --output-dir results/simulations
 ```
 
-## Clinical Test Cases
+Generate the scientific figures from the saved reference results:
 
-| Test ID | Condition | R0 (mmHg·s/mL) | Gaut | Description |
-|---------|-----------|----------------|------|-------------|
-| T0 | Healthy control | 526.3 | 3.0 | Normal anatomy, reference |
-| T1 | Mild IIH | 2000 | 0.5 | Bilateral J3 stenosis, impaired autoregulation |
-| T2 | Severe TBI | 1800 | 0.3 | Venous congestion with impaired autoregulation |
-| T3 | Acute edema/bleed (low compliance) | 2900 | 1.0 | Elevated elastance, J3 stenosis |
-
-**Aspiration Sites:**
-- **Pvs** - Superior sagittal sinus
-- **Pv** - Confluence of sinuses
-
-
-## Model Validation
-
-The model has been validated against:
-1. **Gadda et al. (2015)** - Baseline ICP and venous pressures in supine/upright postures
-2. **Stenosis patterns** - ICP elevation with varying degrees of venous obstruction
-3. **Autoregulation** - CPP maintenance under MAP changes
-4. **CSF dynamics** - Formation/absorption balance
-
-## Output Files
-
-All results are saved to:
-- `output/` - Publication-quality figures (PNG)
-
-
-## Model Details
-
-### State Variables (15)
-1. `Pic` - Intracranial pressure
-2. `Ppa` - Pial arterial pressure
-3. `Pv` - Venous outflow pressure
-4. `Pvs` - Superior sagittal sinus pressure
-5. `Pjr3` - Right jugular J3
-6. `Pjl3` - Left jugular J3
-7. `Pjr2` - Right jugular J2
-8. `Pjl2` - Left jugular J2
-9. `Pc3` - Collateral c3 pressure
-10. `Pc2` - Collateral c2 pressure
-11. `Pvv` - Vertebral venous pressure
-12. `Pazy` - Azygos pressure
-13. `Psvc` - Superior vena cava pressure
-14. `xaut` - Autoregulation state
-15. `Cpa` - Pial arterial compliance
-
-### Key Equations
-
-**ICP Balance:**
-```
-dPic/dt = (1/Cic) * [Cpa*dPpa/dt + Cv*dPv_trans/dt + Ccsf*dPcsf/dt]
+```bash
+cerebral-hemodynamics-plot \
+  --results-dir reference_results/figure_data \
+  --output-dir figures
 ```
 
-**Venous Aspiration:**
+The plotting command does not rerun the simulations. It produces editable
+vector PDF files and 600-dpi PNG files using Arial and a color-vision-safe
+palette.
+
+## Python example
+
+```python
+from pathlib import Path
+import numpy as np
+
+from cerebral_hemodynamics_aspiration import integrate, make_tbi_parameters
+
+parameters = make_tbi_parameters()
+output_dir = Path("results/example")
+
+baseline = integrate(
+    parameters,
+    parameters.initial_state(),
+    label="tbi_baseline",
+    output_dir=output_dir,
+)
+
+baseline_state = np.asarray(baseline["terminal_window_mean_state"], dtype=float)
+intervention = integrate(
+    parameters,
+    baseline_state,
+    label="pv_240",
+    site="Pv",
+    flow_ml_min=240.0,
+    output_dir=output_dir,
+)
+
+delta_icp = (
+    baseline["summary"]["icp_mean_mmhg"]
+    - intervention["summary"]["icp_mean_mmhg"]
+)
+print(f"Predicted ICP reduction: {delta_icp:.2f} mmHg")
 ```
-Q_asp = (Pv - P_external) / (R_vein + R_catheter)
-dPv/dt = dPv_trans/dt + dPic/dt
-dPv_trans/dt = (1/Cv) * (Q_in - Q_out - Q_asp)
+
+## Repository structure
+
+```text
+src/cerebral_hemodynamics_aspiration/
+    model.py            Governing equations and flow calculations
+    parameters.py       Physiological and numerical parameter sets
+    simulation.py       Integration, convergence, and result serialization
+    experiments.py      Dose-response, site-comparison, and sensitivity runs
+    visualization.py    Scientific visualization of saved results
+
+reference_implementation/  Archived result-producing source and source manifest
+reference_results/         Saved simulation reports and aggregate data
+figures/                   Vector PDF and 600-dpi PNG figures
+tests/                     Equation, provenance, and regression tests
+docs/                      Model scope, provenance, and release notes
 ```
 
-**Starling Resistor (Collapsible Veins):**
+Development and reuse should use the modules under `src/`. The historical
+filenames in `reference_implementation/` are retained unchanged because their
+hashes are embedded in the saved results.
+
+## Model states
+
+| State | Description |
+|---|---|
+| `Pic` | Intracranial pressure |
+| `Ppa` | Pial arterial pressure |
+| `Pv` | Cerebral-vein pressure |
+| `Pvs` | Venous-sinus pressure |
+| `Pjr3`, `Pjl3` | Right and left jugular J3 pressure |
+| `Pjr2`, `Pjl2` | Right and left jugular J2 pressure |
+| `Pc3`, `Pc2` | Collateral pathway pressures |
+| `Pvv` | Vertebral venous pressure |
+| `Pazy` | Azygos pressure |
+| `Psvc` | Superior vena cava pressure |
+| `xaut` | Cerebral autoregulatory state |
+
+The J1 confluence pressure is solved algebraically. Pial arterial compliance
+`Cpa` is derived from `xaut` at each model evaluation.
+
+## Governing relationships
+
+The intracranial pressure balance is evaluated as
+
+```text
+dPic/dt = [Cpa·d(Ppa-Pic)/dt + Cvi·d(Pv-Pic)/dt
+           + dCpa/dt·(Ppa-Pic) + Qf - Q0] / Cic
 ```
-R_collapse = R0 * exp(-kE * (P_internal - P_external))
+
+Cerebral-vein aspiration enters the venous mass balance as an external sink:
+
+```text
+d(Pv-Pic)/dt = (Qin,v - Qout,v - Qasp) / Cvi
 ```
 
-## Citation
+Jugular conductance follows the pressure-dependent sigmoid used by Gadda et
+al.:
 
-If you use this model in your research, please cite:
+```text
+Gj = kj [1 + (2/π) arctan((Pupstream - Pexternal)/A)]²
+```
 
-**Original Model:**
-Gadda G, et al. (2015) "A new hemodynamic model shows that temporal venous stenosis can cause idiopathic intracranial hypertension." *Acta Neurochirurgica*
+See `model.py` and `parameters.py` for the complete implemented equations,
+units, branch conditions, and parameter provenance.
 
-**Aspiration Extension:**
-If you use the aspiration extension, please cite:
-Mengesha Assefa, A., "Venous Aspiration for Intracranial Pressure Management: A Lumped Parameter Modeling," University of Nebraska at Omaha, 2025. [In preparation]
+## Reference results
 
-## License
+For the implemented TBI-like parameter state, the converged simulations give:
 
-MIT License - See LICENSE file for details
+| Aspiration condition | ICP reduction (mmHg) |
+|---|---:|
+| Cerebral-vein node, 240 mL/min | 3.0682 |
+| Cerebral-vein node, 480 mL/min | 6.2045 |
+| Venous-sinus node, 240 mL/min | 0.2689 |
+| Bilateral J3 nodes, 240 mL/min | 0.1450 |
+| Bilateral J2 nodes, 240 mL/min | 0.1212 |
+
+These are deterministic model predictions rather than measured biological
+effects. The constructed TBI-like state and aspiration predictions require
+independent experimental validation.
+
+## Reproducibility
+
+The test suite checks:
+
+- equation-level parity with the archived result-producing implementation;
+- mass balance and model-domain conditions;
+- convergence and terminal pressure residuals;
+- source and input fingerprints;
+- consistency of 91 saved simulation reports; and
+- independently solved local equilibria for the principal results.
+
+See [model scope and limitations](docs/MODEL_SCOPE_AND_LIMITATIONS.md) and
+[source provenance](docs/PROVENANCE.md) before interpreting or citing the
+results.
+
+## Scientific basis and citation
+
+The cerebral and venous model is based principally on:
+
+- Gadda G, et al. (2015), “A new hemodynamic model shows that temporal venous
+  stenosis can cause idiopathic intracranial hypertension,” *Acta
+  Neurochirurgica*.
+- Ursino and Lodi (1997), cerebral autoregulation modeling.
+- Marmarou et al. (1975), intracranial pressure-volume and CSF dynamics.
+
+The venous-aspiration extension is being prepared for publication by Adisu
+Mengesha Assefa and collaborators. Add a formal software citation only after
+the author list and manuscript citation have been approved by all contributors.
 
 ## Contact
 
-**Author:** Adisu Mengesha Assefa  
-**Position:** PhD Student & Graduate Assistant  
-**Institution:** Department of Biomechanics, University of Nebraska at Omaha  
-**Email:** aassefa@unomaha.edu  
+**Adisu Mengesha Assefa**
 
-
+- PhD Student and Graduate Assistant
+- Department of Biomechanics, University of Nebraska at Omaha
+- Email: aassefa@unomaha.edu
 
 ## Acknowledgments
-This work was carried out under the supervision of Prof. Majid Jadidi, Department of Biomechanics, University of Nebraska at Omaha. I sincerely appreciate his guidance and support throughout the development of this project.
 
-- Original model: Gadda et al. (2015)
-- Cerebral autoregulation: Ursino & Lodi (1997)
-- CSF dynamics: Marmarou et al. (1975)
+This work was conducted under the supervision of Prof. Majid Jadidi,
+Department of Biomechanics, University of Nebraska at Omaha. The model builds
+on the cerebral hemodynamics, autoregulation, and CSF literature cited above.
 
+## License
+
+Licensed under the MIT License. The license permits software reuse; it does not
+certify clinical performance or fitness for medical use.

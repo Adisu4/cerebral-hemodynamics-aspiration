@@ -11,6 +11,7 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+dist_*/
 downloads/
 eggs/
 .eggs/
@@ -200,6 +201,9 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# Generated study outputs (reference_results is intentionally versioned)
+results/
 
 # Marimo
 marimo/_static/
