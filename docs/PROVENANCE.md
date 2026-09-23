@@ -1,8 +1,10 @@
 # Source and result provenance
 
-The result-producing source was recovered and audited outside Git. Every one of
-the 91 run reports and both aggregate JSON records that contain source hashes
-identify the same five files.
+The historical source was recovered and audited before the modular release.
+The five files below preserve the equations, parameters, and original study
+workflow used for that audit. The current full-return publication workflow is
+`src/cerebral_hemodynamics_aspiration/experiments.py`; the 89 saved run reports
+record hashes of the current modular numerical source and all run inputs.
 
 | Archived source file | SHA-256 |
 |---|---|
@@ -16,11 +18,12 @@ The complete immutable review archive has SHA-256
 `392ebb87b6eb0c9b4df770ffabdad053b35b5ce1bf3c8231770cdae9a92b2d5d`.
 It is a review artifact, not a clinical or publication certification.
 
-`reference_implementation/` preserves the five source files exactly. Their
-historical filenames are retained because changing them would invalidate the
-recorded hashes. The installable package uses scientific module names in a
-conventional `src/` layout. Regression tests compare parameters and equation
-evaluations with the archived source and inspect every saved report.
+`reference_implementation/` preserves the five historical source files exactly.
+Their filenames and hashes identify the audit archive, not the current
+publication run configuration. The installable package uses scientific module
+names in a conventional `src/` layout. Regression tests compare parameters and
+equation evaluations with the archived source and inspect every current saved
+report. The prior no-return results remain available in Git history.
 
 The previous repository history is not provenance for these results. Neither
 the earlier main branch nor the pre-existing `v1.0.0` tag contains this audited

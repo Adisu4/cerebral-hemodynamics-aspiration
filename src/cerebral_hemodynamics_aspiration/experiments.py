@@ -111,7 +111,7 @@ def main(force: bool = False, output_dir: Path = DEFAULT_RESULTS_DIR) -> None:
         label = f"reference_{site.lower()}_240"
         result = maybe_run(
             force, output_dir, copy.deepcopy(reference_parameters), reference_state.copy(),
-            label=label, site=site, flow_ml_min=240.0,
+            label=label, site=site, flow_ml_min=240.0, return_fraction=1.0,
         )
         reference_site_reports[site] = result
         rows.append({
@@ -152,7 +152,7 @@ def main(force: bool = False, output_dir: Path = DEFAULT_RESULTS_DIR) -> None:
             label = f"dose_{site.lower()}_{safe_token(rate)}"
             report = maybe_run(
                 force, output_dir, copy.deepcopy(tbi_parameters), tbi_state.copy(),
-                label=label, site=site, flow_ml_min=rate,
+                label=label, site=site, flow_ml_min=rate, return_fraction=1.0,
             )
             dose_reports[(site, rate)] = report
             rows.append({
@@ -161,21 +161,6 @@ def main(force: bool = False, output_dir: Path = DEFAULT_RESULTS_DIR) -> None:
                 "baseline_icp_mmhg": baseline_icp, "outcome_icp_mmhg": icp(report),
                 "delta_icp_mmhg": baseline_icp - icp(report),
             })
-
-    reinfusion_reports: dict[str, dict] = {}
-    for site in ("Pv", "Pvs"):
-        label = f"return_{site.lower()}_240"
-        report = maybe_run(
-            force, output_dir, copy.deepcopy(tbi_parameters), tbi_state.copy(),
-            label=label, site=site, flow_ml_min=240.0, return_fraction=1.0,
-        )
-        reinfusion_reports[site] = report
-        rows.append({
-            "family": "reinfusion_comparator", "label": label, "site": site,
-            "flow_ml_min": 240.0, "parameter": "return_fraction",
-            "parameter_value": 1.0, "baseline_icp_mmhg": baseline_icp,
-            "outcome_icp_mmhg": icp(report), "delta_icp_mmhg": baseline_icp - icp(report),
-        })
 
     fixed_parameters = make_tbi_parameters()
     fixed_parameters.terminal_resistance_mode = "fixed_Rvs1"
@@ -195,7 +180,7 @@ def main(force: bool = False, output_dir: Path = DEFAULT_RESULTS_DIR) -> None:
         label = f"fixed_rvs_{site.lower()}_240"
         result = maybe_run(
             force, output_dir, copy.deepcopy(fixed_parameters), fixed_state.copy(),
-            label=label, site=site, flow_ml_min=240.0,
+            label=label, site=site, flow_ml_min=240.0, return_fraction=1.0,
         )
         fixed_site_reports[site] = result
         rows.append({
@@ -228,6 +213,7 @@ def main(force: bool = False, output_dir: Path = DEFAULT_RESULTS_DIR) -> None:
             aspiration = maybe_run(
                 force, output_dir, copy.deepcopy(p), matched_state,
                 label=aspiration_label, site="Pv", flow_ml_min=240.0,
+                return_fraction=1.0,
             )
             pair = {
                 "parameter": parameter_name,
@@ -259,7 +245,8 @@ def main(force: bool = False, output_dir: Path = DEFAULT_RESULTS_DIR) -> None:
         label = f"verify_radau_{site.lower()}_{safe_token(rate)}"
         report = maybe_run(
             force, output_dir, copy.deepcopy(tbi_parameters), tbi_state.copy(),
-            label=label, site=site, flow_ml_min=rate, config=strict_config,
+            label=label, site=site, flow_ml_min=rate, return_fraction=1.0,
+            config=strict_config,
         )
         primary = dose_reports[(site, rate)]
         solver_pairs.append({
@@ -302,6 +289,7 @@ def main(force: bool = False, output_dir: Path = DEFAULT_RESULTS_DIR) -> None:
         "schema_version": 1,
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "model_scope": "supine, computational, TBI-like parameter state",
+        "primary_aspiration_boundary": "equal flow returned to lower_SVC_state (return_fraction=1.0)",
         "primary_endpoint": "baseline ICP minus terminal 120-s mean ICP",
         "key_results": key_results,
         "reference_validation": validation,
@@ -324,13 +312,6 @@ def main(force: bool = False, output_dir: Path = DEFAULT_RESULTS_DIR) -> None:
             },
         },
         "solver_verification": solver_pairs,
-        "reinfusion_comparator": {
-            site: {
-                "withdrawal_only_delta_icp_mmhg": baseline_icp - icp(dose_reports[(site, 240.0)]),
-                "full_svc_return_delta_icp_mmhg": baseline_icp - icp(report),
-            }
-            for site, report in reinfusion_reports.items()
-        },
         "sensitivity_grid": sensitivity_grid,
         "sensitivity_pairs": sensitivity_pairs,
         "all_report_count": len([

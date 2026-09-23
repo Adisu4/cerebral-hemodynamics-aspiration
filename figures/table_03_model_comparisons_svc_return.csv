@@ -1,0 +1,4 @@
+comparison,baseline_icp_mmhg,Pv_delta_icp_mmhg,Pvs_delta_icp_mmhg,J3_delta_icp_mmhg,J2_delta_icp_mmhg
+Post-traumatic primary analysis,22.698116408,3.032823467,0.233799057,0.109648019,0.086332579
+Physiological baseline state,9.431126233,0.506978923,0.183087896,0.144348719,0.110458790
+Fixed terminal resistance,16.261837013,2.006593352,0.251249346,0.116239039,0.090600062

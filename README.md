@@ -25,10 +25,13 @@ Key features include:
 - aspiration at the cerebral-vein, venous-sinus, J3, and J2 nodes;
 - matched baseline and intervention simulations;
 - explicit convergence tests and terminal-window averaging; and
-- dose-response, site-comparison, reinfusion, solver, and sensitivity analyses.
+- dose-response, site-comparison, solver, and sensitivity analyses.
 
-Only the supine configuration is implemented. Primary aspiration is modeled as
-external withdrawal. Reinfusion is evaluated as a separate comparator.
+Only the supine configuration is implemented. In every primary aspiration run,
+flow extracted at the selected site is returned at the same instantaneous rate
+to the dynamic lower-SVC compartment (`return_fraction=1.0`). Arterial and
+central venous boundary pressures remain fixed. The model does not simulate an
+extracorporeal device or a systemic physiological response.
 
 ## Reference reproduction
 
@@ -37,10 +40,11 @@ and flows reported by Gadda et al. (2015). This is an implementation-
 reproduction check, not independent biological validation of the aspiration
 model. Upright posture is not included in the maintained implementation.
 
-The repository retains the exact result-producing source and its SHA-256
-manifest under `reference_implementation/`. Regression tests compare the
-maintained modules with that archived implementation and verify every saved run
-report.
+The repository retains the audited historical source and its SHA-256 manifest
+under `reference_implementation/`. The current publication workflow is in
+`src/cerebral_hemodynamics_aspiration/`; each saved report records its source
+hashes and numerical inputs. Regression tests compare the maintained equations
+with the archive and verify the current saved reports.
 
 ## Installation
 
@@ -64,24 +68,28 @@ python -m pytest
 
 ## Quick start
 
-Run the predefined baseline, dose-response, site-comparison, and sensitivity
-experiments:
+Run the complete baseline, dose-response, site-comparison, matched-sensitivity,
+and solver-check study with equal lower-SVC return. The command writes 89
+simulation reports plus the study manifest and summary:
 
 ```bash
 cerebral-hemodynamics-run --output-dir results/simulations
 ```
 
-Generate the scientific figures from the saved reference results:
+Generate Figures 2–6 and Tables 2–3 from the versioned reference results:
 
 ```bash
 cerebral-hemodynamics-plot \
-  --results-dir reference_results/figure_data \
+  --results-dir reference_results/reports \
   --output-dir figures
 ```
 
-The plotting command does not rerun the simulations. It produces editable
-vector PDF files and 600-dpi PNG files using Arial and a color-vision-safe
-palette.
+The command reads the four plotted trajectories from
+`reference_results/figure_data/`. To build from a fresh run, use
+`--results-dir results/simulations`; the trajectory directory then defaults to
+the same run directory. Plotting does not rerun the model. It produces vector
+PDFs and 600-dpi PNGs with Arial labels; the figures and tables are also
+versioned in `figures/`.
 
 ## Python example
 
@@ -108,6 +116,7 @@ intervention = integrate(
     label="pv_240",
     site="Pv",
     flow_ml_min=240.0,
+    return_fraction=1.0,
     output_dir=output_dir,
 )
 
@@ -167,11 +176,14 @@ dPic/dt = [Cpa·d(Ppa-Pic)/dt + Cvi·d(Pv-Pic)/dt
            + dCpa/dt·(Ppa-Pic) + Qf - Q0] / Cic
 ```
 
-Cerebral-vein aspiration enters the venous mass balance as an external sink:
+Cerebral-vein extraction enters its venous mass balance as a local sink:
 
 ```text
 d(Pv-Pic)/dt = (Qin,v - Qout,v - Qasp) / Cvi
 ```
+
+An equal instantaneous `Qasp` enters the lower-SVC pressure balance as
+`Qreturn`. Baseline and control runs have zero extraction and zero return.
 
 Jugular conductance follows the pressure-dependent sigmoid used by Gadda et
 al.:
@@ -189,11 +201,11 @@ For the implemented TBI-like parameter state, the converged simulations give:
 
 | Aspiration condition | ICP reduction (mmHg) |
 |---|---:|
-| Cerebral-vein node, 240 mL/min | 3.0682 |
-| Cerebral-vein node, 480 mL/min | 6.2045 |
-| Venous-sinus node, 240 mL/min | 0.2689 |
-| Bilateral J3 nodes, 240 mL/min | 0.1450 |
-| Bilateral J2 nodes, 240 mL/min | 0.1212 |
+| Cerebral-vein node, 240 mL/min | 3.0328 |
+| Cerebral-vein node, 480 mL/min | 6.1330 |
+| Venous-sinus node, 240 mL/min | 0.2338 |
+| Bilateral J3 nodes, 240 mL/min | 0.1096 |
+| Bilateral J2 nodes, 240 mL/min | 0.0863 |
 
 These are deterministic model predictions rather than measured biological
 effects. The constructed TBI-like state and aspiration predictions require
@@ -207,7 +219,7 @@ The test suite checks:
 - mass balance and model-domain conditions;
 - convergence and terminal pressure residuals;
 - source and input fingerprints;
-- consistency of 91 saved simulation reports; and
+- consistency of 89 saved simulation reports; and
 - independently solved local equilibria for the principal results.
 
 See [model scope and limitations](docs/MODEL_SCOPE_AND_LIMITATIONS.md) and

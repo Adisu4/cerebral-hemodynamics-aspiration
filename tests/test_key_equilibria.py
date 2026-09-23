@@ -16,8 +16,8 @@ from cerebral_hemodynamics_aspiration.parameters import ModelParameters
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_ICP = {
     "tbi_baseline": 22.698884822524803,
-    "dose_pv_240": 19.63079370670662,
-    "dose_pv_480": 16.49464403591705,
+    "dose_pv_240": 19.666231102126197,
+    "dose_pv_480": 16.566100463002616,
 }
 
 
@@ -57,11 +57,11 @@ def test_nominal_local_equilibria_match_independent_audit() -> None:
 
     assert np.isclose(
         solved["tbi_baseline"] - solved["dose_pv_240"],
-        3.068091115818183,
+        3.0326537202788195,
         atol=1e-9,
     )
     assert np.isclose(
         solved["tbi_baseline"] - solved["dose_pv_480"],
-        6.204240786607754,
+        6.1327843594024,
         atol=1e-9,
     )

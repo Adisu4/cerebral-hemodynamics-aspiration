@@ -14,12 +14,11 @@ validated representation of a TBI population.
 
 ## Interpretation limits
 
-The primary intervention removes flow from a model with fixed arterial and
-central venous pressure boundaries. The system has no finite whole-body blood
-volume and no systemic pressure response. At the accepted endpoints, the
-240 mL/min and 480 mL/min cerebral-vein simulations integrate to approximately
-31.08 L and 86.16 L of withdrawal, respectively. Those values expose the
-open-reservoir assumption; they are not treatment volumes.
+The primary intervention extracts flow at a selected venous node and returns
+the same instantaneous flow to the lower-SVC state. Arterial and central
+venous pressure boundaries remain fixed. The model does not include a finite
+whole-body blood volume, extracorporeal circuit, or systemic physiological
+response. Its flow rates and simulated durations are not treatment protocols.
 
 The large upstream/downstream difference is partly structural. In the active
 terminal-vein branch,
@@ -36,7 +35,7 @@ implemented topology and constitutive law and needs physiological testing.
 
 The model does not represent catheter geometry, local vessel collapse or wall
 contact, regional cerebral anatomy, oxygen delivery, hemolysis, thrombosis,
-coagulation, embolism, blood-volume depletion, baroreflexes, or patient
+coagulation, embolism, baroreflexes, or patient
 heterogeneity. It must not be used to select an aspiration rate, duration, or
 catheter position for a patient.
 

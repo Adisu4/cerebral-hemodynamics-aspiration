@@ -11,6 +11,7 @@ import numpy as np
 
 from cerebral_hemodynamics_aspiration import model
 from cerebral_hemodynamics_aspiration.parameters import ModelParameters
+from cerebral_hemodynamics_aspiration.simulation import source_hashes
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,16 +32,17 @@ def _reports() -> list[dict]:
     ]
 
 
-def test_all_91_reports_are_converged_and_equation_consistent() -> None:
+def test_all_89_reports_are_converged_and_equation_consistent() -> None:
     reports = _reports()
-    assert len(reports) == 91
-    archived_hashes = json.loads(
-        (ROOT / "reference_implementation" / "SOURCE_MANIFEST.json").read_text(encoding="utf-8")
-    )["files"]
+    assert len(reports) == 89
+    current_hashes = source_hashes()
 
     for report in reports:
         assert report["converged"] is True
-        assert report["source_hashes_sha256"] == archived_hashes
+        assert report["source_hashes_sha256"] == current_hashes
+        if float(report["flow_ml_min"]) > 0:
+            assert report["return_fraction"] == 1.0
+            assert report["return_site"] == "lower_SVC_state"
         state = np.asarray(report["final_state"], dtype=float)
         flow_ml_s = float(report["flow_ml_min"]) / 60.0
         derivatives, _ = model.evaluate(
@@ -61,7 +63,7 @@ def test_summary_csv_matches_all_referenced_reports() -> None:
         newline="", encoding="utf-8"
     ) as handle:
         rows = list(csv.DictReader(handle))
-    assert len(rows) == 64
+    assert len(rows) == 62
     for row in rows:
         report = reports[row["label"]]
         observed = float(report["summary"]["icp_mean_mmhg"])

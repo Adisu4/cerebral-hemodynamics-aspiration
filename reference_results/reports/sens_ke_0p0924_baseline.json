@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "created_utc": "2026-09-20T05:08:47.387904+00:00",
+  "created_utc": "2026-09-23T17:41:12.698456+00:00",
   "label": "sens_ke_0p0924_baseline",
   "site": "Pv",
   "flow_ml_min": 0.0,
@@ -1009,17 +1009,18 @@
   },
   "environment": {
     "python": "3.13.2",
-    "numpy": "2.3.5",
-    "scipy": "1.16.3",
+    "numpy": "2.3.4",
+    "scipy": "1.16.2",
     "platform": "Windows-11-10.0.26200-SP0"
   },
   "source_hashes_sha256": {
-    "publication_model.py": "ab027031e2aca97252ba5d9f3f67daf3f17c55aeed0c0ab76528d733dc181f7f",
-    "publication_parameters.py": "d008b39646a71c93d4a15c76c1eb26a84bad3f3cb9cebbeeae6f2bed56ef0b88",
-    "run_publication.py": "033f1a77ad05146d0eadfc63d22807d9fa0bfba379d345da35cb717956a12140",
-    "run_publication_study.py": "fcbcd3112644f56505b5d6f3eb0f78e49762d84166e2c364d3bb0e3ff341a7a0",
-    "test_publication_model.py": "995add083ec484051582f2e7e6ff26ec0d1f596b9029ad459b64d43b32959b32"
+    "src/cerebral_hemodynamics_aspiration/model.py": "d16a68de4cea213bd720d1b4cc5a83801c40a3d767debbf14d67623453b0ed82",
+    "src/cerebral_hemodynamics_aspiration/parameters.py": "b6f08b84ed533b3ccebc6e8f19cb9eb27d4708f3f66b4b1bcf626584431013e1",
+    "src/cerebral_hemodynamics_aspiration/simulation.py": "44fc3d04091050447e832bd932cde665e7e32ad201c18dcc3657596ed41ddd22",
+    "src/cerebral_hemodynamics_aspiration/experiments.py": "c7745d4bc7372317ddcaa6f6f263120f513c8eece7dd4c9167f291fa71f2db01"
   },
+  "input_fingerprint_sha256": "56f279aa2eeef59c61f0a81cb19f9b8a0c6da415cd83d795e4971afbbe112d7e",
   "trajectory_file": "sens_ke_0p0924_baseline.npz",
-  "wall_time_s": 2.0365420000016456
+  "trajectory_sha256": "f387996aa244073e1eeaeb49df3b7a72651be9d40f0fceaf6133658fed08c97b",
+  "wall_time_s": 2.9364638999686576
 }

@@ -1,10 +1,10 @@
 {
-  "status": "outputs of the frozen mathematical model; not clinical effects",
-  "endpoint": "baseline ICP minus terminal 120-second mean ICP",
+  "status": "deterministic full lower-SVC-return model predictions; not clinical effects",
+  "endpoint": "matched no-extraction baseline ICP minus terminal 120-second mean ICP",
   "baseline_icp_mmhg": 22.69811640834893,
-  "pv_240_delta_icp_mmhg": 3.0682335071234057,
-  "pv_480_delta_icp_mmhg": 6.204450594953286,
-  "pvs_240_delta_icp_mmhg": 0.268905141935587,
-  "j3_240_delta_icp_mmhg": 0.14500461837128142,
-  "j2_240_delta_icp_mmhg": 0.12121609479340023
+  "pv_240_delta_icp_mmhg": 3.0328234672917063,
+  "pv_480_delta_icp_mmhg": 6.133005057516417,
+  "pvs_240_delta_icp_mmhg": 0.23379905708420878,
+  "j3_240_delta_icp_mmhg": 0.10964801878358088,
+  "j2_240_delta_icp_mmhg": 0.08633257910960879
 }
