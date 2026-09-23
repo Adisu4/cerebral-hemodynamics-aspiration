@@ -22,7 +22,7 @@ from scipy.integrate import solve_ivp
 from scipy.signal import find_peaks
 
 from cerebral_hemodynamics_aspiration import model
-from cerebral_hemodynamics_aspiration.parameters import make_tbi_parameters
+from cerebral_hemodynamics_aspiration.parameters import make_tbi_parameters\nfrom cerebral_hemodynamics_aspiration.simulation import integrate
 
 FS = 50.0
 N_CYCLES = 7
