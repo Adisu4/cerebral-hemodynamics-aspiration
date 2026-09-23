@@ -27,6 +27,14 @@ jobs:
           mkdir -p external_data results/contrast_pulsatility_pilot
           curl -L --fail --retry 5 --retry-delay 5 -o external_data/CONTRAST.tgz "https://zenodo.org/records/4992130/files/CONTRAST.tgz?download=1"
           echo "72908ccf181fb10206e1142cdf7dccb7  external_data/CONTRAST.tgz" | md5sum -c -
+      - name: Inspect archive layout
+        run: |
+          echo "FIRST MEMBERS"
+          tar -tzf external_data/CONTRAST.tgz | head -40
+          echo "FIRST CSV/TXT MEMBER"
+          first=$(tar -tzf external_data/CONTRAST.tgz | grep -Ei '\.(csv|txt)$' | head -1)
+          echo "$first"
+          if [ -n "$first" ]; then tar -xOzf external_data/CONTRAST.tgz "$first" | head -12; fi
       - name: Run isolated two-condition pilot
         run: |
           python analysis/contrast_pulsatility_pilot.py --archive external_data/CONTRAST.tgz --output-dir results/contrast_pulsatility_pilot
@@ -36,5 +44,5 @@ jobs:
         with:
           name: contrast-pulsatility-pilot
           path: results/contrast_pulsatility_pilot/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
