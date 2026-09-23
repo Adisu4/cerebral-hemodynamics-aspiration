@@ -507,35 +507,47 @@ def main() -> None:
     # apply only a constant offset so the cycle-block mean equals 100 mmHg.
     # No pulse amplitude or shape rescaling is performed.
     abp_model_input = abp + (100.0 - float(np.mean(abp)))
-    paw = RawPeriodicPressure(abp_model_input, fs)
+    paw_raw = RawPeriodicPressure(abp, fs)
+    paw_nominal = RawPeriodicPressure(abp_model_input, fs)
 
     static_report = json.loads(Path("reference_results/reports/tbi_baseline.json").read_text())
     static_state = np.asarray(static_report["terminal_window_mean_state"], float)
     print("Selected measured-data window:", json.dumps(selected, indent=2), flush=True)
-    periodic_state, periodic_diagnostics = converge_periodic(static_state, paw)
-    print("Periodic-shape diagnostics:", json.dumps(periodic_diagnostics, indent=2), flush=True)
-    tp, yp = simulate_one_block(periodic_state, paw)
-    icp_pred = yp[0]
 
-    metrics = correlation_metrics(icp_measured, icp_pred, fs)
-    vertical_shift = metrics["constant_vertical_shift_for_overlay_mmhg"]
-    icp_pred_mean_aligned = icp_pred + vertical_shift
+    # Primary same-patient test: use the patient's actual raw ABP, including its
+    # measured mean. First settle slow states at that measured mean pressure.
+    raw_mean_state = equilibrate_at_mean_pressure(static_state, float(np.mean(abp)))
+    periodic_state_raw, periodic_diagnostics_raw = converge_periodic(raw_mean_state, paw_raw)
+    print("Raw-ABP periodic-shape diagnostics:", json.dumps(periodic_diagnostics_raw, indent=2), flush=True)
+    tp_raw, yp_raw = simulate_one_block(periodic_state_raw, paw_raw)
+    icp_pred_raw = yp_raw[0]
+    metrics_raw = correlation_metrics(icp_measured, icp_pred_raw, fs)
 
-    ta, ya = run_aspiration(periodic_state, paw)
+    # Secondary operating-point sensitivity: preserve the identical raw pulse
+    # shape/amplitude but shift ABP by one constant so its mean equals the
+    # maintained model's nominal Pa=100 mmHg.
+    periodic_state_nominal, periodic_diagnostics_nominal = converge_periodic(static_state, paw_nominal)
+    print("Nominal-mean periodic-shape diagnostics:", json.dumps(periodic_diagnostics_nominal, indent=2), flush=True)
+    tp_nominal, yp_nominal = simulate_one_block(periodic_state_nominal, paw_nominal)
+    icp_pred_nominal = yp_nominal[0]
+    metrics_nominal = correlation_metrics(icp_measured, icp_pred_nominal, fs)
+
+    # Virtual aspiration uses the actual patient ABP waveform and its measured mean.
+    ta, ya = run_aspiration(periodic_state_raw, paw_raw)
     icp_asp = ya[0]
 
     # Seven-beat windows: baseline and two post-onset windows.
-    last_start = max(0.0, ASPIRATION_DURATION_S - paw.period_s)
+    last_start = max(0.0, ASPIRATION_DURATION_S - paw_raw.period_s)
     aspiration_windows = {
         "baseline": {
-            "mean_icp_mmhg": float(np.mean(icp_pred)),
-            "min_icp_mmhg": float(np.min(icp_pred)),
-            "max_icp_mmhg": float(np.max(icp_pred)),
-            "peak_to_peak_mmhg": float(np.ptp(icp_pred)),
+            "mean_icp_mmhg": float(np.mean(icp_pred_raw)),
+            "min_icp_mmhg": float(np.min(icp_pred_raw)),
+            "max_icp_mmhg": float(np.max(icp_pred_raw)),
+            "peak_to_peak_mmhg": float(np.ptp(icp_pred_raw)),
         },
-        "around_60s": extract_7beat_window(ta, icp_asp, paw, 60.0),
-        "around_120s": extract_7beat_window(ta, icp_asp, paw, 120.0),
-        "final": extract_7beat_window(ta, icp_asp, paw, last_start),
+        "around_60s": extract_7beat_window(ta, icp_asp, paw_raw, 60.0),
+        "around_120s": extract_7beat_window(ta, icp_asp, paw_raw, 120.0),
+        "final": extract_7beat_window(ta, icp_asp, paw_raw, last_start),
     }
 
     # Save exact measured and model samples used for all figures.
@@ -545,16 +557,18 @@ def main() -> None:
         measured_abp_mmhg=abp,
         model_input_abp_mmhg=abp_model_input,
         measured_icp_mmhg=icp_measured,
-        predicted_icp_mmhg=icp_pred,
-        predicted_icp_mean_aligned_mmhg=icp_pred_mean_aligned,
+        predicted_icp_raw_abp_mmhg=icp_pred_raw,
+        predicted_icp_nominal_mean_abp_mmhg=icp_pred_nominal,
+        predicted_icp_raw_abp_mean_aligned_mmhg=icp_pred_raw + metrics_raw["constant_vertical_shift_for_overlay_mmhg"],
+        predicted_icp_nominal_mean_abp_mean_aligned_mmhg=icp_pred_nominal + metrics_nominal["constant_vertical_shift_for_overlay_mmhg"],
         aspiration_time_s=ta,
         aspiration_icp_mmhg=icp_asp,
     )
 
     with (out / "charis1_selected_7beats.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["time_s", "measured_abp_mmhg", "model_input_abp_mmhg", "measured_icp_mmhg", "predicted_icp_mmhg", "predicted_icp_mean_aligned_mmhg"])
-        for row in zip(time, abp, abp_model_input, icp_measured, icp_pred, icp_pred_mean_aligned):
+        w.writerow(["time_s", "measured_abp_mmhg", "nominal_mean_abp_mmhg", "measured_icp_mmhg", "predicted_icp_raw_abp_mmhg", "predicted_icp_nominal_mean_abp_mmhg"])
+        for row in zip(time, abp, abp_model_input, icp_measured, icp_pred_raw, icp_pred_nominal):
             w.writerow([float(x) for x in row])
 
     summary = {
@@ -572,8 +586,14 @@ def main() -> None:
             "model_input_interpolation": "piecewise linear between raw 50-Hz ABP samples",
         },
         "selection": selected,
-        "periodic_shape_convergence": periodic_diagnostics,
-        "validation": metrics,
+        "periodic_shape_convergence": {
+            "raw_patient_abp": periodic_diagnostics_raw,
+            "nominal_mean_abp": periodic_diagnostics_nominal,
+        },
+        "validation": {
+            "primary_raw_patient_abp": metrics_raw,
+            "secondary_nominal_mean_abp": metrics_nominal,
+        },
         "aspiration": {
             "site": "Pv",
             "flow_ml_min": ASPIRATION_ML_MIN,
