@@ -65,34 +65,54 @@ def notch_score(w):
     return best
 
 def analyze(pa,name):
+    """Choose the cleanest 15-s window within the initial 60-s resting record."""
     if len(pa)<4500 or np.mean(np.isfinite(pa))<.995:return None
-    pa=pa[np.isfinite(pa)]
-    if np.quantile(pa,.001)<20 or np.quantile(pa,.999)>260:return None
-    s=savgol_filter(pa,11,3)
-    peaks,_=find_peaks(s,distance=int(.45*FS),prominence=8.0)
-    if len(peaks)<25:return None
-    rr=np.diff(peaks)/FS; med=np.median(rr); hr=60/med; cv=np.std(rr)/np.mean(rr)
-    if not 45<=hr<=100 or cv>.08:return None
-    beats=[]
-    for i,r in enumerate(rr):
-        if abs(r-med)/med>.12:continue
-        b=s[peaks[i]:peaks[i+1]+1]
-        if len(b)>=40: beats.append(resample(b))
-        if len(beats)>=20:break
-    if len(beats)<12:return None
-    B=np.vstack(beats); w=B.mean(0)
-    corrs=[np.corrcoef(b,w)[0,1] for b in B]
-    if np.median(corrs)<.95:return None
-    mean=float(pa.mean()); pp=float(np.ptp(w))
-    if not 60<=mean<=150 or not 20<=pp<=100:return None
-    t=np.arange(len(pa))/FS; drift=float(np.polyfit(t,pa,1)[0]*60)
-    if abs(drift)>10:return None
-    ns,np_=notch_score(w)
-    return dict(subject=sid(name)[0],filename=Path(name).name,hr_bpm=float(hr),rr_cv=float(cv),
-                mean_pa_mmhg=mean,pulse_pressure_mmhg=pp,
-                median_beat_correlation=float(np.median(corrs)),drift_mmhg_min=drift,
-                notch_score=float(ns),notch_phase=float(np_) if np.isfinite(np_) else None,
-                n_beats=len(beats),wave=w)
+    pa=np.asarray(pa,float)
+    win=int(15*FS); step=int(5*FS)
+    candidates=[]
+    for a in range(0,max(1,len(pa)-win+1),step):
+        x=pa[a:a+win]
+        if len(x)<win or np.mean(np.isfinite(x))<.995: continue
+        x=x[np.isfinite(x)]
+        # Reject obvious catheter flushes/disconnections/spikes.
+        if np.quantile(x,.005)<35 or np.quantile(x,.995)>220: continue
+        s=savgol_filter(x,11,3)
+        peaks,_=find_peaks(s,distance=int(.45*FS),prominence=8.0)
+        if len(peaks)<9: continue
+        rr=np.diff(peaks)/FS
+        med=float(np.median(rr))
+        if med<=0: continue
+        hr=60/med
+        # Robust rhythm variability; single detector errors should not reject an otherwise clean window.
+        rr_mad=float(np.median(np.abs(rr-med)))
+        robust_cv=(1.4826*rr_mad)/med
+        if not 45<=hr<=100 or robust_cv>.06: continue
+        beats=[]
+        for i,r in enumerate(rr):
+            if abs(r-med)/med>.12: continue
+            b=s[peaks[i]:peaks[i+1]+1]
+            if len(b)>=40: beats.append(resample(b))
+        if len(beats)<8: continue
+        B=np.vstack(beats); w=B.mean(0)
+        corrs=[np.corrcoef(b,w)[0,1] for b in B if np.std(b)>0 and np.std(w)>0]
+        corr=float(np.median(corrs)) if corrs else 0.0
+        if corr<.93: continue
+        mean=float(np.mean(x)); pp=float(np.ptp(w))
+        if not 60<=mean<=150 or not 20<=pp<=100: continue
+        t=np.arange(len(x))/FS; drift=float(np.polyfit(t,x,1)[0]*60)
+        if abs(drift)>12: continue
+        ns,np_=notch_score(w)
+        # Prefer stable rhythm, repeatable beats, low drift, and a recognizable notch.
+        score=8*robust_cv + 0.06*abs(drift) + 3*max(0,.98-corr) - 2*ns
+        candidates.append(dict(subject=sid(name)[0],filename=Path(name).name,
+            window_start_s=float(a/FS),window_end_s=float((a+win)/FS),
+            hr_bpm=float(hr),rr_cv=float(robust_cv),mean_pa_mmhg=mean,
+            pulse_pressure_mmhg=pp,median_beat_correlation=corr,
+            drift_mmhg_min=drift,notch_score=float(ns),
+            notch_phase=float(np_) if np.isfinite(np_) else None,
+            n_beats=len(beats),wave=w,_score=float(score)))
+    if not candidates:return None
+    return min(candidates,key=lambda r:r["_score"])
 
 def choose(recs,n=NTRACE):
     if not recs: raise RuntimeError("No traces passed QC")
@@ -102,7 +122,7 @@ def choose(recs,n=NTRACE):
     X=np.array([[r[f] for f in fields] for r in pool],float)
     med=np.median(X,0); mad=np.median(np.abs(X-med),0); mad[mad<1e-9]=1
     d=np.sqrt(np.sum(((X-med)/(1.4826*mad))**2,1))
-    q=np.array([4*r["rr_cv"]+.05*abs(r["drift_mmhg_min"])-.25*r["notch_score"] for r in pool])
+    q=np.array([r["_score"] for r in pool])
     order=np.argsort(d+q)
     return [pool[i] for i in order[:min(n,len(pool))]]
 
@@ -186,7 +206,7 @@ def main():
     fit,coeff,rmse,r2=fourier(rep); paw=PaWave(coeff,T)
 
     with (out/"selected_traces.csv").open("w",newline="") as f:
-        fields=[k for k in chosen[0] if k!="wave"]; w=csv.DictWriter(f,fieldnames=fields); w.writeheader()
+        fields=[k for k in chosen[0] if k not in ("wave","_score")]; w=csv.DictWriter(f,fieldnames=fields); w.writeheader()
         for r in chosen:w.writerow({k:r[k] for k in fields})
     with (out/"fourier_coefficients.csv").open("w",newline="") as f:
         w=csv.DictWriter(f,fieldnames=["harmonic","a_cos_mmhg","b_sin_mmhg"]);w.writeheader();w.writerows(coeff)
