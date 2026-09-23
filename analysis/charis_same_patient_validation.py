@@ -160,6 +160,10 @@ def evaluate_window(abp: np.ndarray, icp: np.ndarray, fs: float, global_start: i
         c = icp[start:stop]
         if len(a) < int(N_BEATS * 0.45 * fs):
             continue
+        # The final seven-beat validation segment itself—not only its parent
+        # 30-s screening window—must lie in the model's target ICP range.
+        if not (ICP_VALIDATION_RANGE_MMHG[0] <= float(np.mean(c)) <= ICP_VALIDATION_RANGE_MMHG[1]):
+            continue
 
         abp_pp = float(np.quantile(a, 0.995) - np.quantile(a, 0.005))
         icp_pp = float(np.quantile(c, 0.995) - np.quantile(c, 0.005))
