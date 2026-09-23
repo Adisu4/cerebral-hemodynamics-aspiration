@@ -184,7 +184,7 @@ def settle(initial,paw):
     state=np.asarray(initial,float).copy()
     rhs=rhs_factory(paw)
     prev=None; stable=0
-    for k in range(1,121):
+    for k in range(1,241):
         a=(k-1)*paw.T; b=k*paw.T
         te=np.arange(a,b+0.0101,0.02); te[-1]=b
         sol=solve_ivp(rhs,(a,b),state,method="BDF",rtol=1e-8,atol=1e-10,
@@ -252,7 +252,27 @@ def main():
 
     baseline=json.loads(Path("reference_results/reports/tbi_baseline.json").read_text())
     initial=np.asarray(baseline["terminal_window_mean_state"],float)
-    state,settle_blocks=settle(initial,paw)
+
+    # Initialization only: equilibrate the unchanged TBI parameter set at the
+    # selected patient's measured mean ABP. No measured ICP is used here.
+    pmean=make_tbi_parameters()
+    pmean.Pa=float(np.mean(A))
+    pre=integrate(
+        pmean,
+        initial,
+        label="charis1_mean_abp_precondition",
+        output_dir=out/"precondition",
+        overwrite=True,
+    )
+    pre_state=np.asarray(pre["terminal_window_mean_state"],float)
+    selection_snapshot={
+        "selected_segment": {k:v for k,v in chosen.items() if k!="local_peaks"},
+        "mean_abp_precondition_icp_mmhg": float(pre["summary"]["icp_mean_mmhg"]),
+    }
+    (out/"selection_and_precondition.json").write_text(json.dumps(selection_snapshot,indent=2))
+    print(json.dumps(selection_snapshot,indent=2), flush=True)
+
+    state,settle_blocks=settle(pre_state,paw)
 
     tb,yb=simulate_block(state,paw)
     pred=interp_to_measured(tb,yb[0],len(I))
