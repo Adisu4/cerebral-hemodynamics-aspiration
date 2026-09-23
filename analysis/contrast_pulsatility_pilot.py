@@ -187,7 +187,7 @@ def main():
     ap=argparse.ArgumentParser(); ap.add_argument("--archive",type=Path,required=True); ap.add_argument("--output-dir",type=Path,required=True)
     a=ap.parse_args(); out=a.output_dir; out.mkdir(parents=True,exist_ok=True)
     recs=[]; seen=set()
-    with tarfile.open(a.archive,"r|gz") as tar:
+    with tarfile.open(a.archive,"r:gz") as tar:
         for m in tar:
             if not m.isfile() or not m.name.lower().endswith(".csv"): continue
             try: s,suf=sid(m.name)
