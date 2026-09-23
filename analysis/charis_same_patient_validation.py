@@ -290,7 +290,7 @@ def converge_periodic(initial: np.ndarray, paw: RawPeriodicPressure) -> np.ndarr
     for block in range(1, 121):
         a = (block - 1) * paw.period_s
         b = block * paw.period_s
-        te = np.arange(a, b, 1.0 / paw.fs)
+        te = a + np.arange(len(paw.samples), dtype=float) / paw.fs
         sol = solve_ivp(
             rhs,
             (a, b),
@@ -319,7 +319,7 @@ def converge_periodic(initial: np.ndarray, paw: RawPeriodicPressure) -> np.ndarr
 
 def simulate_one_block(initial: np.ndarray, paw: RawPeriodicPressure) -> tuple[np.ndarray, np.ndarray]:
     rhs = make_rhs(paw, 0.0, 0.0, 0.0)
-    t = np.arange(0.0, paw.period_s, 1.0 / paw.fs)
+    t = np.arange(len(paw.samples), dtype=float) / paw.fs
     sol = solve_ivp(
         rhs,
         (0.0, paw.period_s),
@@ -376,7 +376,8 @@ def correlation_metrics(measured: np.ndarray, predicted: np.ndarray, fs: float) 
 
 def run_aspiration(initial: np.ndarray, paw: RawPeriodicPressure) -> tuple[np.ndarray, np.ndarray]:
     rhs = make_rhs(paw, ASPIRATION_ML_MIN, RAMP_S, 1.0)
-    t = np.arange(0.0, ASPIRATION_DURATION_S + 1e-12, 1.0 / paw.fs)
+    n_out = int(round(ASPIRATION_DURATION_S * paw.fs)) + 1
+    t = np.linspace(0.0, ASPIRATION_DURATION_S, n_out)
     sol = solve_ivp(
         rhs,
         (0.0, ASPIRATION_DURATION_S),
