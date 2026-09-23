@@ -12,4 +12,4 @@ reference_results/reports/*.json linguist-generated=true
 reference_results/study_manifest.json linguist-generated=true
 
 # Preserve byte-for-byte provenance snapshots on every operating system.
-frozen_reference/*.py -text
+reference_implementation/*.py -text
