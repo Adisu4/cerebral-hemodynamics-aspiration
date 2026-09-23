@@ -1,4 +1,4 @@
-Table 2. Final ICP and ICP reduction for complete lower-SVC return.
+Extended Data Table 1. Final ICP and ICP reduction for complete lower-SVC return.
 Matched no-extraction TBI baseline ICP: 22.698116 mmHg.
 
 | Rate (mL/min) | Cerebral vein final ICP | ΔICP | Venous sinus final ICP | ΔICP | J3 final ICP | ΔICP | J2 final ICP | ΔICP |

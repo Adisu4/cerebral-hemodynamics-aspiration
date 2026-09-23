@@ -1,4 +1,4 @@
-Table 3. Model comparisons of ICP reduction at 240 mL/min with complete lower-SVC return.
+Table 2. Model comparisons of ICP reduction at 240 mL/min with complete lower-SVC return.
 
 | Comparison | Cerebral vein ΔICP | Venous sinus ΔICP | J3 ΔICP | J2 ΔICP |
 |---|---:|---:|---:|---:|

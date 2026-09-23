@@ -1,4 +1,4 @@
-"""Build manuscript figures and tables from converged full-return run reports.
+"""Build main-text and Extended Data displays from full-return run reports.
 
 This module reads saved simulations; it does not change or rerun the model.
 Every nonzero-flow report must document equal return to the lower SVC.
@@ -177,7 +177,7 @@ def figure_2(source: Source, output: Path) -> None:
     fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(.5, -.02),
                ncol=2, frameon=False)
     fig.tight_layout(rect=(0, .10, 1, 1), w_pad=2)
-    save_figure(fig, output, "figure_02_reference_reproduction")
+    save_figure(fig, output, "extended_data_figure_01_reference_reproduction")
 
 
 def figure_3(source: Source, reports: dict, output: Path,
@@ -227,7 +227,7 @@ def figure_3(source: Source, reports: dict, output: Path,
               ncol=3)
     finish_axes(ax)
     fig.subplots_adjust(bottom=0.28)
-    save_figure(fig, output, "figure_03_icp_time_course_svc_return")
+    save_figure(fig, output, "figure_02_icp_time_course_svc_return")
 
 
 def figure_4(reports: dict, output: Path, baseline_icp: float) -> None:
@@ -253,13 +253,12 @@ def figure_4(reports: dict, output: Path, baseline_icp: float) -> None:
               ncol=3)
     finish_axes(ax)
     fig.subplots_adjust(bottom=0.3)
-    save_figure(fig, output, "figure_04_flow_response_svc_return")
+    save_figure(fig, output, "figure_03_flow_response_svc_return")
 
 
 def figure_5(reports: dict, baseline: dict, output: Path) -> None:
-    panels = ((0, "ICP (Pic)"), (2, "Cerebral veins (Pv)"),
-              (3, "Venous sinus (Pvs)"))
-    fig, axes = plt.subplots(1, 3, figsize=(7.2, 3.15))
+    panels = ((2, "Cerebral veins (Pv)"), (3, "Venous sinus (Pvs)"))
+    fig, axes = plt.subplots(1, 2, figsize=(7.1, 3.2))
     x = np.arange(len(SITES))
     for panel_index, (state_index, title) in enumerate(panels):
         ax = axes[panel_index]
@@ -286,7 +285,7 @@ def figure_5(reports: dict, baseline: dict, output: Path) -> None:
                     va="bottom" if value >= 0 else "top", fontsize=8)
         finish_axes(ax)
     fig.tight_layout(w_pad=1.6)
-    save_figure(fig, output, "figure_05_pressure_coupling_svc_return")
+    save_figure(fig, output, "figure_04_venous_pressure_reductions_svc_return")
 
 
 def figure_6(sensitivity: dict, nominal_delta: float,
@@ -325,7 +324,7 @@ def figure_6(sensitivity: dict, nominal_delta: float,
                label="Nominal value")
     ax.legend(frameon=False, loc="lower right")
     fig.tight_layout()
-    save_figure(fig, output, "figure_06_parameter_sensitivity_svc_return")
+    save_figure(fig, output, "extended_data_figure_02_parameter_sensitivity_svc_return")
 
 
 def write_csv(path: Path, fields: list[str], rows: list[dict]) -> None:
@@ -340,7 +339,7 @@ def write_table_2(reports: dict, baseline_icp: float, output: Path) -> None:
     for site in SITES:
         fields.extend((f"{site}_final_icp_mmhg", f"{site}_delta_icp_mmhg"))
     rows = []
-    md = ["Table 2. Final ICP and ICP reduction for complete lower-SVC return.",
+    md = ["Extended Data Table 1. Final ICP and ICP reduction for complete lower-SVC return.",
           f"Matched no-extraction TBI baseline ICP: {baseline_icp:.6f} mmHg.", "",
           "| Rate (mL/min) | Cerebral vein final ICP | ΔICP | Venous sinus final ICP | ΔICP | J3 final ICP | ΔICP | J2 final ICP | ΔICP |",
           "|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
@@ -356,8 +355,8 @@ def write_table_2(reports: dict, baseline_icp: float, output: Path) -> None:
         rows.append(row)
         md.append("| " + " | ".join(text) + " |")
     md += ["", "Values are deterministic final 120-s mean ICP results. The extraction rate is returned in full to the lower-SVC state. ΔICP equals the matched no-extraction baseline minus final ICP."]
-    write_csv(output / "table_02_dose_response_svc_return.csv", fields, rows)
-    (output / "table_02_dose_response_svc_return.md").write_bytes(
+    write_csv(output / "extended_data_table_01_dose_response_svc_return.csv", fields, rows)
+    (output / "extended_data_table_01_dose_response_svc_return.md").write_bytes(
         ("\n".join(md) + "\n").encode("utf-8"))
 
 
@@ -370,7 +369,7 @@ def write_table_3(source: Source, primary: dict, baseline: dict,
     )
     fields = ["comparison", "baseline_icp_mmhg"] + [f"{site}_delta_icp_mmhg" for site in SITES]
     rows = []
-    md = ["Table 3. Model comparisons of ICP reduction at 240 mL/min with complete lower-SVC return.", "",
+    md = ["Table 2. Model comparisons of ICP reduction at 240 mL/min with complete lower-SVC return.", "",
           "| Comparison | Cerebral vein ΔICP | Venous sinus ΔICP | J3 ΔICP | J2 ΔICP |",
           "|---|---:|---:|---:|---:|"]
     for description, baseline_label, prefix in comparisons:
@@ -388,8 +387,8 @@ def write_table_3(source: Source, primary: dict, baseline: dict,
         rows.append(row)
         md.append("| " + " | ".join(text) + " |")
     md += ["", "Values are ΔICP relative to each comparison's matched no-extraction baseline. All aspiration cases use complete return to the lower-SVC state. The fixed-resistance comparison has a different baseline equilibrium."]
-    write_csv(output / "table_03_model_comparisons_svc_return.csv", fields, rows)
-    (output / "table_03_model_comparisons_svc_return.md").write_bytes(
+    write_csv(output / "table_02_model_comparisons_svc_return.csv", fields, rows)
+    (output / "table_02_model_comparisons_svc_return.md").write_bytes(
         ("\n".join(md) + "\n").encode("utf-8"))
 
 
@@ -417,7 +416,7 @@ def cli(argv: list[str] | None = None) -> int:
     parser.add_argument("--trajectories-dir", type=Path, default=None,
                         help="Directory of NPZ trajectories (defaults to the saved reference trajectories or the results directory)")
     parser.add_argument("--output-dir", type=Path, default=root / "figures",
-                        help="Destination for figures and Tables 2-3")
+                        help="Destination for main-text and Extended Data displays")
     args = parser.parse_args(argv)
     reports_dir = args.results_dir.resolve()
     trajectories_dir = (args.trajectories_dir.resolve() if args.trajectories_dir
@@ -447,14 +446,16 @@ def cli(argv: list[str] | None = None) -> int:
     figure_6(sensitivity, nominal_delta, output_dir)
 
     captions = (
-        "Figure 3. ICP response after onset of prescribed venous extraction with complete lower-SVC return. "
+        "Figure 2. ICP response after onset of prescribed venous extraction with complete lower-SVC return. "
         f"The black pre-intervention trace shows the final 20 min of the no-extraction post-traumatic baseline ({baseline_icp:.3f} mmHg). "
         "Extraction and return flows ramp linearly over the first 60 s from t = 0; intervention curves show Pv at 240 and 480 mL/min and Pvs at 240 mL/min.\n\n"
-        "Figure 4. Final ICP across extraction locations and rates with complete lower-SVC return. "
+        "Figure 3. Final ICP across extraction locations and rates with complete lower-SVC return. "
         f"The dotted horizontal line marks the no-extraction baseline of {baseline_icp:.2f} mmHg.\n\n"
-        "Figure 5. Terminal pressure reductions at 240 mL/min with complete lower-SVC return, relative to the matched no-extraction post-traumatic baseline. "
-        "Panels show ICP (Pic), cerebral venous pressure (Pv), and venous sinus pressure (Pvs).\n\n"
-        "Figure 6. One-at-a-time sensitivity of ICP reduction during 240 mL/min cerebral-vein extraction with complete lower-SVC return. "
+        "Figure 4. Terminal venous-pressure reductions at 240 mL/min with complete lower-SVC return, relative to the matched no-extraction post-traumatic baseline. "
+        "Panels show cerebral venous pressure (A, Pv) and venous sinus pressure (B, Pvs).\n\n"
+        "Extended Data Figure 1. Reproduction of selected published supine baseline flows and pressures from Gadda et al. (2015). "
+        "Black bars show the published reference values; open circles show the current model reproduction.\n\n"
+        "Extended Data Figure 2. One-at-a-time sensitivity of ICP reduction during 240 mL/min cerebral-vein extraction with complete lower-SVC return. "
         "Open circles show tested values; horizontal segments span each parameter's predicted reductions; "
         f"stars mark nominal settings; the dashed line marks the nominal {nominal_delta:.3f}-mmHg reduction.\n"
     )
@@ -484,7 +485,7 @@ def cli(argv: list[str] | None = None) -> int:
     }
     (output_dir / "artifact_provenance.json").write_bytes(
         (json.dumps(provenance, indent=2) + "\n").encode("utf-8"))
-    print(f"Wrote Figures 2-6 and Tables 2-3 to {output_dir}")
+    print(f"Wrote main Figures 2-4 and Table 2 plus Extended Data displays to {output_dir}")
     return 0
 
 

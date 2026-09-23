@@ -76,7 +76,8 @@ simulation reports plus the study manifest and summary:
 cerebral-hemodynamics-run --output-dir results/simulations
 ```
 
-Generate Figures 2–6 and Tables 2–3 from the versioned reference results:
+Generate the selected main-text and Extended Data displays from the versioned
+reference results:
 
 ```bash
 cerebral-hemodynamics-plot \
@@ -89,7 +90,10 @@ The command reads the four plotted trajectories from
 `--results-dir results/simulations`; the trajectory directory then defaults to
 the same run directory. Plotting does not rerun the model. It produces vector
 PDFs and 600-dpi PNGs with Arial labels; the figures and tables are also
-versioned in `figures/`.
+versioned in `figures/`. Main Figure 1 (model schematic) and Table 1 (model
+parameters) are manuscript artwork and are not produced by this plotting
+command. See [`figures/README.md`](figures/README.md) for the exact display
+mapping.
 
 ## Python example
 

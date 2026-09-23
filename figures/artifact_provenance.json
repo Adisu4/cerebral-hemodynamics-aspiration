@@ -1,6 +1,6 @@
 {
   "generator": "src/cerebral_hemodynamics_aspiration/visualization.py",
-  "generator_sha256": "dbe88b0240a68fd4452c436317e046cdbeb4a56488fa351b64b0e56aee6176b2",
+  "generator_sha256": "6261ace2fe5fc3c4d52a90e77a688fa994d4056a8493688cf5aa78e9ab21493a",
   "model_run_boundary_condition": "return_fraction=1.0; lower_SVC_state",
   "reports_dir": "reference_results/reports",
   "trajectories_dir": "reference_results/figure_data",
@@ -98,21 +98,21 @@
     "tbi_baseline.json": "68123672ef8c75400b03b4e1c76d881925fe677896f36d0e7f251c0276bc3b6f"
   },
   "outputs_sha256": {
-    "figure_02_reference_reproduction.pdf": "67c6ca355101e48c381c32ec8264fbefd0dc70a5c76e8f0791d8f8e15ff3c1d0",
-    "figure_02_reference_reproduction.png": "1d64b1cc1a5c898369bf2a4a9c356e8bd805fd6bb3b0de892975d65388cfb099",
-    "figure_03_icp_time_course_svc_return.pdf": "e1ffc0353ac9a33e9d77320dc1a20f5654a7855945048984c3ef1799f525fbf6",
-    "figure_03_icp_time_course_svc_return.png": "77623f51f38eebd7d2281c4fa9079088fcd979837802c82ba74805f6c30e3792",
-    "figure_04_flow_response_svc_return.pdf": "76b5238e932b7c434f7a120f70cf3c7e5dbb651a43cdf2ec4957ddb0c8a654d7",
-    "figure_04_flow_response_svc_return.png": "8eabbcd67b702875fde137a5a1ceadc8ab5ddfcb100734b8b6531394f18bc1ba",
-    "figure_05_pressure_coupling_svc_return.pdf": "d726b86422610c79adec8e6e931a8948f3751193bad0c709046ae00bf0d45f85",
-    "figure_05_pressure_coupling_svc_return.png": "597110f5609279052801d02e04768d3d679a8be9a895824080d8af406b3f0387",
-    "figure_06_parameter_sensitivity_svc_return.pdf": "adea5b841e12d8129b193938bacfbf79635378c3f297da6cec25eff9bde79b23",
-    "figure_06_parameter_sensitivity_svc_return.png": "30ec99ab6269ebcc522e7d65259dc6bb15a0b00c579cd948fbf03909f05b956b",
-    "figure_captions_svc_return.md": "e4a6d0ee370a99c7adb15c329253d4ded27a4719e8e355eb02d5c19eb9f5816a",
-    "README.md": "a9a46522985d32b6347c35d697a180a46e2057b2a95c2f916fa5d5922999e4da",
-    "table_02_dose_response_svc_return.csv": "de5961c706c2175c7e63e6bffee9aa4704f0e1c3bc0d36d08518cb899b9da51b",
-    "table_02_dose_response_svc_return.md": "97831f06d07e22a648a05bcad5ad68a2bbe7a42f80b74023ceab95a071ca9e4f",
-    "table_03_model_comparisons_svc_return.csv": "c0a7374515a9655da671bb8f7214c4343e03d62b0fde77ceac68c52a6085fe28",
-    "table_03_model_comparisons_svc_return.md": "c87a5b5410cfcbe11f4f9abfece06afd46be33be7ef91e1eabe5db65884780de"
+    "extended_data_figure_01_reference_reproduction.pdf": "e53a0dc2d659c555acec56094f99be179c782b6eb02e45a71df929e95e3f4d65",
+    "extended_data_figure_01_reference_reproduction.png": "1d64b1cc1a5c898369bf2a4a9c356e8bd805fd6bb3b0de892975d65388cfb099",
+    "extended_data_figure_02_parameter_sensitivity_svc_return.pdf": "e7c7cef5bff61dad9dccfc72e516605c1829a8c103d3cc68394daf7d3856cd52",
+    "extended_data_figure_02_parameter_sensitivity_svc_return.png": "30ec99ab6269ebcc522e7d65259dc6bb15a0b00c579cd948fbf03909f05b956b",
+    "extended_data_table_01_dose_response_svc_return.csv": "de5961c706c2175c7e63e6bffee9aa4704f0e1c3bc0d36d08518cb899b9da51b",
+    "extended_data_table_01_dose_response_svc_return.md": "6f066dc82a79550e711b8bc8b687ae7c770dd1c1f2bd2d60558e5cb57f8ba252",
+    "figure_02_icp_time_course_svc_return.pdf": "bb3554cb0f4cd997922d1680768385729d53910db6d8439018150035188a246a",
+    "figure_02_icp_time_course_svc_return.png": "77623f51f38eebd7d2281c4fa9079088fcd979837802c82ba74805f6c30e3792",
+    "figure_03_flow_response_svc_return.pdf": "3db7a6e464bf0bd319d616f1e5a5c31c5046310760d8330cd9e580a66b986633",
+    "figure_03_flow_response_svc_return.png": "8eabbcd67b702875fde137a5a1ceadc8ab5ddfcb100734b8b6531394f18bc1ba",
+    "figure_04_venous_pressure_reductions_svc_return.pdf": "4f89282f494f6a05b5bca3265e3288085f57bea33e71902d38f162c7c908aec5",
+    "figure_04_venous_pressure_reductions_svc_return.png": "578e92f596ac73541d4f4744c7ee854b82f991deff1a09037948b5ac6fdea61a",
+    "figure_captions_svc_return.md": "06511e07ad153ecf0e92a57353f22e64340860745898445cf901e331cfa6c24f",
+    "README.md": "de997c040755f89879dd42a69bdf37953893e3477e97513d1fef41dc5eec3da5",
+    "table_02_model_comparisons_svc_return.csv": "c0a7374515a9655da671bb8f7214c4343e03d62b0fde77ceac68c52a6085fe28",
+    "table_02_model_comparisons_svc_return.md": "b419a3a37a6e78bf57dd128e6e31d680d27239eb0d1c33c9072e402f51eb386e"
   }
 }
