@@ -24,8 +24,13 @@ jobs:
       - name: Download CHARIS patient 1
         run: |
           mkdir -p external_data/charis results/charis_validation
-          curl -L --fail --retry 5 --retry-delay 5 -o external_data/charis/charis1.dat "https://physionet.org/files/charisdb/1.0.0/charis1.dat"
-          curl -L --fail --retry 5 --retry-delay 5 -o external_data/charis/charis1.hea "https://physionet.org/files/charisdb/1.0.0/charis1.hea"
+          if command -v aws >/dev/null 2>&1; then
+            aws s3 cp --no-sign-request s3://physionet-open/charisdb/1.0.0/charis1.dat external_data/charis/charis1.dat
+            aws s3 cp --no-sign-request s3://physionet-open/charisdb/1.0.0/charis1.hea external_data/charis/charis1.hea
+          else
+            curl -L --fail --retry 5 --retry-delay 5 -o external_data/charis/charis1.dat "https://physionet.org/files/charisdb/1.0.0/charis1.dat"
+            curl -L --fail --retry 5 --retry-delay 5 -o external_data/charis/charis1.hea "https://physionet.org/files/charisdb/1.0.0/charis1.hea"
+          fi
           echo "7ffc3614913c4205bb9322d8e9870b43244e6047901851d9894aa23781da7a28  external_data/charis/charis1.dat" | sha256sum -c -
           echo "5112c06bccc122c614f19efa599be5c2b7647b7adbab8712994d8420b27a04bc  external_data/charis/charis1.hea" | sha256sum -c -
       - name: Run same-patient waveform validation and virtual aspiration
