@@ -1,6 +1,6 @@
 {
   "generator": "src/cerebral_hemodynamics_aspiration/visualization.py",
-  "generator_sha256": "6261ace2fe5fc3c4d52a90e77a688fa994d4056a8493688cf5aa78e9ab21493a",
+  "generator_sha256": "a4ffc785c5524789f04dc78a9fb28bc6687a8e551ca4cb06224e63d423dac0e4",
   "model_run_boundary_condition": "return_fraction=1.0; lower_SVC_state",
   "reports_dir": "reference_results/reports",
   "trajectories_dir": "reference_results/figure_data",
@@ -106,12 +106,12 @@
     "extended_data_table_01_dose_response_svc_return.md": "6f066dc82a79550e711b8bc8b687ae7c770dd1c1f2bd2d60558e5cb57f8ba252",
     "figure_02_icp_time_course_svc_return.pdf": "bb3554cb0f4cd997922d1680768385729d53910db6d8439018150035188a246a",
     "figure_02_icp_time_course_svc_return.png": "77623f51f38eebd7d2281c4fa9079088fcd979837802c82ba74805f6c30e3792",
-    "figure_03_flow_response_svc_return.pdf": "3db7a6e464bf0bd319d616f1e5a5c31c5046310760d8330cd9e580a66b986633",
-    "figure_03_flow_response_svc_return.png": "8eabbcd67b702875fde137a5a1ceadc8ab5ddfcb100734b8b6531394f18bc1ba",
+    "figure_03_flow_response_svc_return.pdf": "c97c54548cc790906911ed4f3d9cb0efcf4de73cbca619d3f5395ab148f390ed",
+    "figure_03_flow_response_svc_return.png": "ac73f527c2a57ffe742491b01d00bf32301d8a72b28203831bbdc583936c91ff",
     "figure_04_venous_pressure_reductions_svc_return.pdf": "4f89282f494f6a05b5bca3265e3288085f57bea33e71902d38f162c7c908aec5",
     "figure_04_venous_pressure_reductions_svc_return.png": "578e92f596ac73541d4f4744c7ee854b82f991deff1a09037948b5ac6fdea61a",
-    "figure_captions_svc_return.md": "06511e07ad153ecf0e92a57353f22e64340860745898445cf901e331cfa6c24f",
-    "README.md": "de997c040755f89879dd42a69bdf37953893e3477e97513d1fef41dc5eec3da5",
+    "figure_captions_svc_return.md": "40cc18b66aa211813916b5f7ac12d6befdb82cbb1d7f097f73457a4027471615",
+    "README.md": "3a4354911e0f67631a4ceebf74360fe50e065a6762f3aa31cc9ba5852266d6cd",
     "table_02_model_comparisons_svc_return.csv": "c0a7374515a9655da671bb8f7214c4343e03d62b0fde77ceac68c52a6085fe28",
     "table_02_model_comparisons_svc_return.md": "b419a3a37a6e78bf57dd128e6e31d680d27239eb0d1c33c9072e402f51eb386e"
   }

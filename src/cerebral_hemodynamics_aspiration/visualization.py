@@ -232,27 +232,28 @@ def figure_3(source: Source, reports: dict, output: Path,
 
 def figure_4(reports: dict, output: Path, baseline_icp: float) -> None:
     fig, ax = plt.subplots(figsize=(7.1, 4.35))
-    values = [baseline_icp]
-    for site in SITES:
-        subset = [reports[(site, rate)] for rate in RATES]
-        y = [baseline_icp] + [icp(report) for report in subset]
-        values.extend(y)
-        ax.plot([0, *RATES], y, color=COLORS[site], marker=MARKERS[site],
-                linestyle=LINESTYLES[site], markersize=5.2,
-                markerfacecolor=COLORS[site], markeredgecolor=COLORS[site],
-                markeredgewidth=1.1, label=SITE_NAMES[site])
-    ax.axhline(baseline_icp, color="#8A8A8A", linestyle=(0, (1, 2)),
-               linewidth=1, label=f"No extraction ({baseline_icp:.2f} mmHg)")
-    span = max(max(values) - min(values), 1)
-    ax.set_ylim(min(values) - .08 * span, max(values) + .08 * span)
-    ax.set_xlim(-8, 492)
-    ax.set_xticks([0, *RATES])
+    bar_width = 11.5  # mL/min on the numerical flow-rate axis
+    bar_colors = {"Pv": "#3D7391", "Pvs": "#C28F3D",
+                  "J3": "#4C8A78", "J2": "#A46A8A"}
+    hatches = {"Pv": "", "Pvs": "//", "J3": "xx", "J2": ".."}
+    reductions = {}
+    for site_index, site in enumerate(SITES):
+        reductions[site] = [baseline_icp - icp(reports[(site, rate)])
+                            for rate in RATES]
+        offsets = (site_index - (len(SITES) - 1) / 2) * bar_width
+        ax.bar(np.asarray(RATES) + offsets, reductions[site],
+               width=bar_width * .88, color=bar_colors[site],
+               edgecolor=COLORS["ink"], linewidth=.65,
+               hatch=hatches[site], label=SITE_NAMES[site], zorder=2)
+    ax.set_ylim(0, max(max(values) for values in reductions.values()) * 1.08)
+    ax.set_xlim(28, 510)
+    ax.set_xticks(RATES)
     ax.set_xlabel("Extraction and SVC-return rate (mL/min)")
-    ax.set_ylabel("Final intracranial pressure (mmHg)")
-    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.23),
-              ncol=3)
+    ax.set_ylabel("ICP reduction, ΔICP (mmHg)")
+    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.22),
+              ncol=2)
     finish_axes(ax)
-    fig.subplots_adjust(bottom=0.3)
+    fig.subplots_adjust(bottom=0.31)
     save_figure(fig, output, "figure_03_flow_response_svc_return")
 
 
@@ -449,8 +450,10 @@ def cli(argv: list[str] | None = None) -> int:
         "Figure 2. ICP response after onset of prescribed venous extraction with complete lower-SVC return. "
         f"The black pre-intervention trace shows the final 20 min of the no-extraction post-traumatic baseline ({baseline_icp:.3f} mmHg). "
         "Extraction and return flows ramp linearly over the first 60 s from t = 0; intervention curves show Pv at 240 and 480 mL/min and Pvs at 240 mL/min.\n\n"
-        "Figure 3. Final ICP across extraction locations and rates with complete lower-SVC return. "
-        f"The dotted horizontal line marks the no-extraction baseline of {baseline_icp:.2f} mmHg.\n\n"
+        "Figure 3. ICP reduction across extraction locations and prescribed flow rates with complete lower-SVC return. "
+        f"Each bar is the matched no-extraction baseline ({baseline_icp:.2f} mmHg) minus the final 120-s mean ICP of one deterministic simulation. "
+        "Extraction and return flow ramp over 60 s, then remain at the target rate until convergence. "
+        "The seven rates were simulated separately; bars do not represent changes over time.\n\n"
         "Figure 4. Terminal venous-pressure reductions at 240 mL/min with complete lower-SVC return, relative to the matched no-extraction post-traumatic baseline. "
         "Panels show cerebral venous pressure (A, Pv) and venous sinus pressure (B, Pvs).\n\n"
         "Extended Data Figure 1. Reproduction of selected published supine baseline flows and pressures from Gadda et al. (2015). "
