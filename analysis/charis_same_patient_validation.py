@@ -49,6 +49,7 @@ REFINE_STEP_S = 5.0
 ASPIRATION_ML_MIN = 240.0
 RAMP_S = 60.0
 ASPIRATION_DURATION_S = 180.0
+ICP_VALIDATION_RANGE_MMHG = (20.0, 25.0)
 
 
 def parse_header(path: Path) -> dict:
@@ -129,7 +130,7 @@ def evaluate_window(abp: np.ndarray, icp: np.ndarray, fs: float, global_start: i
         return None
     if np.quantile(abp, 0.005) < 20.0 or np.quantile(abp, 0.995) > 230.0:
         return None
-    if not (-5.0 <= np.mean(icp) <= 45.0):
+    if not (ICP_VALIDATION_RANGE_MMHG[0] <= np.mean(icp) <= ICP_VALIDATION_RANGE_MMHG[1]):
         return None
     if np.quantile(icp, 0.001) < -20.0 or np.quantile(icp, 0.999) > 80.0:
         return None
@@ -497,13 +498,17 @@ def main() -> None:
     time = np.arange(len(abp), dtype=float) / fs
 
     # Selection begins/ends on detected systolic peaks; final data remain raw.
-    paw = RawPeriodicPressure(abp, fs)
+    # The maintained TBI model is defined at Pa=100 mmHg. For waveform
+    # validation, preserve this patient's measured beat-to-beat ABP exactly and
+    # apply only a constant offset so the cycle-block mean equals 100 mmHg.
+    # No pulse amplitude or shape rescaling is performed.
+    abp_model_input = abp + (100.0 - float(np.mean(abp)))
+    paw = RawPeriodicPressure(abp_model_input, fs)
 
     static_report = json.loads(Path("reference_results/reports/tbi_baseline.json").read_text())
     static_state = np.asarray(static_report["terminal_window_mean_state"], float)
     print("Selected measured-data window:", json.dumps(selected, indent=2), flush=True)
-    mean_equilibrium_state = equilibrate_at_mean_pressure(static_state, float(np.mean(abp)))
-    periodic_state, periodic_diagnostics = converge_periodic(mean_equilibrium_state, paw)
+    periodic_state, periodic_diagnostics = converge_periodic(static_state, paw)
     print("Periodic-shape diagnostics:", json.dumps(periodic_diagnostics, indent=2), flush=True)
     tp, yp = simulate_one_block(periodic_state, paw)
     icp_pred = yp[0]
@@ -534,6 +539,7 @@ def main() -> None:
         out / "charis1_validation_and_aspiration.npz",
         validation_time_s=time,
         measured_abp_mmhg=abp,
+        model_input_abp_mmhg=abp_model_input,
         measured_icp_mmhg=icp_measured,
         predicted_icp_mmhg=icp_pred,
         predicted_icp_mean_aligned_mmhg=icp_pred_mean_aligned,
@@ -543,8 +549,8 @@ def main() -> None:
 
     with (out / "charis1_selected_7beats.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["time_s", "abp_mmhg", "measured_icp_mmhg", "predicted_icp_mmhg", "predicted_icp_mean_aligned_mmhg"])
-        for row in zip(time, abp, icp_measured, icp_pred, icp_pred_mean_aligned):
+        w.writerow(["time_s", "measured_abp_mmhg", "model_input_abp_mmhg", "measured_icp_mmhg", "predicted_icp_mmhg", "predicted_icp_mean_aligned_mmhg"])
+        for row in zip(time, abp, abp_model_input, icp_measured, icp_pred, icp_pred_mean_aligned):
             w.writerow([float(x) for x in row])
 
     summary = {
@@ -554,9 +560,12 @@ def main() -> None:
             "record": header["record"],
             "record_metadata": header["comments"],
             "sampling_hz": fs,
-            "selection_rule": "best 7-beat window by measured ABP/ICP signal quality only; no model output used in selection",
-            "final_waveform_processing": "none; raw measured ABP and ICP samples",
-            "model_input_interpolation": "piecewise linear between raw 50-Hz ABP samples; no filter or Fourier fit",
+            "selection_rule": "eligibility required measured mean ICP 20-25 mmHg (matching the model's intracranial-hypertension operating range); within eligible windows, selection used measured ABP/ICP signal quality only and no model output",
+            "validation_icp_mean_range_mmhg": list(ICP_VALIDATION_RANGE_MMHG),
+            "final_waveform_processing": "measured ABP and ICP remain raw; no smoothing/filtering/ensemble averaging/Fourier fit",
+            "model_input_abp": "raw measured ABP plus one constant offset to make its 7-beat mean 100 mmHg; pulse amplitude and shape unchanged",
+            "model_input_abp_constant_shift_mmhg": float(100.0 - np.mean(abp)),
+            "model_input_interpolation": "piecewise linear between raw 50-Hz ABP samples",
         },
         "selection": selected,
         "periodic_shape_convergence": periodic_diagnostics,
