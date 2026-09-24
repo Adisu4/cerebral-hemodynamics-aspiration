@@ -52,7 +52,7 @@ CSV tables retain nine decimal places; manuscript tables round to three.
 Figure 1 is the model schematic retained in the manuscript. Main Table 1 and
 supplementary Tables S1–S6 document parameters, initial states, and site
 definitions in the Word documents. They are not outputs of the plotting
-command. The supplement is cited as Additional file 1.
+command. The supplement is cited as Supplementary Material.
 
 The rate-response graph is intentionally omitted: its results are reported in
 Table 2 and Table S7. Numerical uncertainty is not inferred from repeated

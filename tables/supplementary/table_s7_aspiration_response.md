@@ -31,4 +31,4 @@ Table S7. Final ICP and ICP reduction across aspiration rates and sites.
 | 480 | Bilateral J3 | 22.477 | 0.221 |
 | 480 | Bilateral J2 | 22.524 | 0.174 |
 
-Matched no-aspiration post-traumatic baseline ICP: 22.698 mmHg. Final ICP is the mean over the final 120 s after convergence; ΔICP equals baseline minus final ICP. Each rate was simulated separately with equal lower-SVC return.
+The no-aspiration post-traumatic baseline ICP was 22.698 mmHg. Final ICP is the mean over the final 120 s after convergence; ΔICP equals baseline minus final ICP. Each aspiration flow rate was simulated separately.

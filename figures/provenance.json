@@ -1,6 +1,6 @@
 {
   "generator": "src/cerebral_hemodynamics_aspiration/figures.py",
-  "generator_sha256": "585a8e43452c8288615e0a560c829a43eb8c77dbd0a959d6e5011cbce877d93a",
+  "generator_sha256": "c652a5f992958539cd13f65b22479811b1e55fcf3dce887abee67f9e0676a143",
   "model_run_boundary_condition": "return_fraction=1.0; lower_SVC_state",
   "reports_dir": "data/reports",
   "trajectories_dir": "data/trajectories",
@@ -98,22 +98,22 @@
     "tbi_baseline.npz": "5c9e656b6b5b41e9780d3a08326a210266a38c447fe7bddf381c20ca125bb7ee"
   },
   "figures_sha256": {
-    "captions.md": "a144425ae841f34645840ce16a651a9da230b8d5ef5a8faa1974ca28ab2ce5a9",
-    "figure_2_icp_response.pdf": "7b228f751185898a4bf9af41f3c9e6f13927e5d88f6839990fcefff2c091a70a",
-    "figure_2_icp_response.png": "77623f51f38eebd7d2281c4fa9079088fcd979837802c82ba74805f6c30e3792",
-    "figure_3_venous_pressure.pdf": "4526689372a9290357909f1fddeca216cc43944b0c82802fa91ca016e975cbdb",
+    "captions.md": "b13bf02c44e10dfccd578dcd11a65d93d4fae61059758486f9e76578826d8a65",
+    "figure_2_icp_response.pdf": "6487de8c268551ba74ddb60461801c6dcb3f49d82043a496de9b38e0c91f4e6f",
+    "figure_2_icp_response.png": "030aebc8cd5a166690263050522cfc420656f00b0da846de99129ae8181d1a91",
+    "figure_3_venous_pressure.pdf": "bc4d5c01f6aeaf546aa957dead3728122f843f95f73b09d28f1bb46dfcb52715",
     "figure_3_venous_pressure.png": "578e92f596ac73541d4f4744c7ee854b82f991deff1a09037948b5ac6fdea61a",
-    "supplementary/figure_s1_reference_hemodynamics.pdf": "9a17c7c6ff982b85597f6d6d5aa7b2b81ce93c299ab85a2cfe630b5b24486609",
+    "supplementary/figure_s1_reference_hemodynamics.pdf": "0b448471b1d42f47b623b25cd908b0ad72a454ed6ed065d0209892caee10a2e8",
     "supplementary/figure_s1_reference_hemodynamics.png": "1d64b1cc1a5c898369bf2a4a9c356e8bd805fd6bb3b0de892975d65388cfb099",
-    "supplementary/figure_s2_parameter_sensitivity.pdf": "bba83aad2739c73a9c35ee0d3e3adb3f46799dc772aa2c40f5a49d2099a8099c",
+    "supplementary/figure_s2_parameter_sensitivity.pdf": "239ac2779dd3d176d7ea166c0ae823d0d95f2fc17d05f48a22639f80e8a3eb82",
     "supplementary/figure_s2_parameter_sensitivity.png": "30ec99ab6269ebcc522e7d65259dc6bb15a0b00c579cd948fbf03909f05b956b"
   },
   "tables_sha256": {
     "supplementary/table_s7_aspiration_response.csv": "0e8c35c31185331b910a99665fe7400daa531110aac4e87cf73cefbf93a22b10",
-    "supplementary/table_s7_aspiration_response.md": "695a5f93d67e2db1f3fa605a30fc39dc6e8a9b09282fd2e4b798755ca00178be",
+    "supplementary/table_s7_aspiration_response.md": "4acb0e9213dca8d2e9517457b6bb4ad0af8b3d117520e77332557998cbcaada8",
     "supplementary/table_s8_model_comparison.csv": "c0a7374515a9655da671bb8f7214c4343e03d62b0fde77ceac68c52a6085fe28",
-    "supplementary/table_s8_model_comparison.md": "5858f95845c804d7990a86dc8bd047b59e5bbf81b2f16fdeaf0641bb823c3d93",
+    "supplementary/table_s8_model_comparison.md": "c43eab0a0c58aadcbdd05dc1970a05be86e6e690012029da0f81eef0548a2fd3",
     "table_2_icp_reduction.csv": "a94f1e1b32d5fb89c21781e81b250d8b8618d4819d5b4fc06f9981208d078337",
-    "table_2_icp_reduction.md": "cadc929ff39f40f3fec7fe55b10a89d7149c08d2fe334a68de59fbce5323ec9e"
+    "table_2_icp_reduction.md": "4eb708dfbe7f1e195a62b0c94520b06c847d7b2cabca58b1b1645374dde8b3fa"
   }
 }

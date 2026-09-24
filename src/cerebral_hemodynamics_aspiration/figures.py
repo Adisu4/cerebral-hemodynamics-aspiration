@@ -221,7 +221,7 @@ def plot_icp_response(source: Source, reports: dict, output: Path,
             f"Elevated baseline ICP: {baseline_icp:.2f} mmHg",
             ha="left", va="bottom", fontsize=9, style="italic",
             bbox={"facecolor": "white", "edgecolor": "none", "pad": 1.5})
-    ax.set_xlabel("Time relative to extraction onset (min)")
+    ax.set_xlabel("Time relative to aspiration onset (min)")
     ax.set_ylabel("Intracranial pressure (mmHg)")
     ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.23),
               ncol=3)
@@ -311,14 +311,14 @@ def write_csv(path: Path, fields: list[str], rows: list[dict]) -> None:
 def write_primary_table(reports: dict, baseline_icp: float, output: Path) -> None:
     fields = ["site", "delta_icp_240_mmhg", "delta_icp_480_mmhg"]
     rows = []
-    md = ["Table 2. ICP reduction at the nominal and maximum aspiration rates.", "",
+    md = ["Table 2. ICP reduction at the nominal and maximum aspiration flow rates.", "",
           "| Aspiration site | ΔICP at 240 mL/min (mmHg) | ΔICP at 480 mL/min (mmHg) |",
           "|---|---:|---:|"]
     for site in SITES:
         values = [baseline_icp - icp(reports[(site, rate)]) for rate in (240, 480)]
         rows.append(dict(zip(fields, [site, *[f"{v:.9f}" for v in values]])))
         md.append(f"| {SITE_NAMES[site]} | {values[0]:.3f} | {values[1]:.3f} |")
-    md += ["", f"ΔICP is the no-aspiration post-traumatic baseline ICP ({baseline_icp:.3f} mmHg) minus the final 120-s mean ICP. All aspiration runs used equal lower-SVC return. Values are deterministic model outputs."]
+    md += ["", f"ΔICP is the no-aspiration post-traumatic baseline ICP ({baseline_icp:.3f} mmHg) minus the mean ICP over the final 120 s after convergence. Values are deterministic model outputs."]
     write_csv(output / "table_2_icp_reduction.csv", fields, rows)
     (output / "table_2_icp_reduction.md").write_bytes(("\n".join(md) + "\n").encode("utf-8"))
 
@@ -335,7 +335,7 @@ def write_aspiration_table(reports: dict, baseline_icp: float, output: Path) -> 
             delta = baseline_icp - final
             rows.append(dict(zip(fields, [rate, site, f"{final:.9f}", f"{delta:.9f}"])))
             md.append(f"| {rate} | {SITE_NAMES[site]} | {final:.3f} | {delta:.3f} |")
-    md += ["", f"Matched no-aspiration post-traumatic baseline ICP: {baseline_icp:.3f} mmHg. Final ICP is the mean over the final 120 s after convergence; ΔICP equals baseline minus final ICP. Each rate was simulated separately with equal lower-SVC return."]
+    md += ["", f"The no-aspiration post-traumatic baseline ICP was {baseline_icp:.3f} mmHg. Final ICP is the mean over the final 120 s after convergence; ΔICP equals baseline minus final ICP. Each aspiration flow rate was simulated separately."]
     write_csv(output / "table_s7_aspiration_response.csv", fields, rows)
     (output / "table_s7_aspiration_response.md").write_bytes(("\n".join(md) + "\n").encode("utf-8"))
 
@@ -349,7 +349,7 @@ def write_comparison_table(source: Source, primary: dict, baseline: dict,
     )
     fields = ["comparison", "baseline_icp_mmhg"] + [f"{site}_delta_icp_mmhg" for site in SITES]
     rows = []
-    md = ["Table S8. Model comparisons of ICP reduction at 240 mL/min with complete lower-SVC return.", "",
+    md = ["Table S8. Model comparisons of ICP reduction at 240 mL/min.", "",
           "| Comparison | Cerebral vein ΔICP | Venous sinus ΔICP | J3 ΔICP | J2 ΔICP |",
           "|---|---:|---:|---:|---:|"]
     for description, baseline_label, prefix in comparisons:
@@ -366,7 +366,7 @@ def write_comparison_table(source: Source, primary: dict, baseline: dict,
             text.append(f"{delta:.3f}")
         rows.append(row)
         md.append("| " + " | ".join(text) + " |")
-    md += ["", "Values are ΔICP relative to each comparison's matched no-extraction baseline. All aspiration cases use complete return to the lower-SVC state. The fixed-resistance comparison has a different baseline equilibrium."]
+    md += ["", "Values are ΔICP relative to the corresponding baseline without aspiration. The fixed-resistance comparison has a different baseline equilibrium."]
     write_csv(output / "table_s8_model_comparison.csv", fields, rows)
     (output / "table_s8_model_comparison.md").write_bytes(
         ("\n".join(md) + "\n").encode("utf-8"))
@@ -429,14 +429,14 @@ def cli(argv: list[str] | None = None) -> int:
     plot_parameter_sensitivity(sensitivity, nominal_delta, figure_dir / "supplementary")
 
     captions = (
-        "Figure 2. ICP response after onset of venous aspiration with equal lower-SVC return. "
+        "Figure 2. ICP response after onset of venous aspiration. "
         f"The black trace shows the final 20 min of the elevated no-aspiration baseline ({baseline_icp:.3f} mmHg). "
-        "Aspiration and return ramp over 60 s; intervention curves show cerebral-vein aspiration at 240 and 480 mL/min and venous-sinus aspiration at 240 mL/min.\n\n"
-        "Figure 3. Venous pressure reductions at 240 mL/min with equal lower-SVC return. "
+        "Aspiration flow increases linearly over 60 s; intervention curves show cerebral-vein aspiration at 240 and 480 mL/min and venous-sinus aspiration at 240 mL/min.\n\n"
+        "Figure 3. Venous pressure reductions after convergence at 240 mL/min. "
         "Panels show the reductions from the matched no-aspiration baseline in cerebral venous pressure (A) and venous sinus pressure (B).\n\n"
         "Figure S1. Reproduction of selected published supine hemodynamic values. "
         "Black bars show the published reference values; open circles show the model reproduction. This is a source-reference benchmark, not independent validation of the aspiration intervention.\n\n"
-        "Figure S2. One-at-a-time sensitivity of ICP reduction during cerebral-vein aspiration at 240 mL/min with equal lower-SVC return. "
+        "Figure S2. One-at-a-time sensitivity of ICP reduction during cerebral-vein aspiration at 240 mL/min. "
         "Open circles show tested parameter settings; horizontal segments span their deterministic outputs, and stars mark nominal settings. "
         f"The dashed line marks the nominal {nominal_delta:.3f}-mmHg reduction. The ranges are not statistical uncertainty intervals.\n"
     )

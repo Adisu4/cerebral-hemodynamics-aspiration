@@ -1,4 +1,4 @@
-Table 2. ICP reduction at the nominal and maximum aspiration rates.
+Table 2. ICP reduction at the nominal and maximum aspiration flow rates.
 
 | Aspiration site | ΔICP at 240 mL/min (mmHg) | ΔICP at 480 mL/min (mmHg) |
 |---|---:|---:|
@@ -7,4 +7,4 @@ Table 2. ICP reduction at the nominal and maximum aspiration rates.
 | Bilateral J3 | 0.110 | 0.221 |
 | Bilateral J2 | 0.086 | 0.174 |
 
-ΔICP is the no-aspiration post-traumatic baseline ICP (22.698 mmHg) minus the final 120-s mean ICP. All aspiration runs used equal lower-SVC return. Values are deterministic model outputs.
+ΔICP is the no-aspiration post-traumatic baseline ICP (22.698 mmHg) minus the mean ICP over the final 120 s after convergence. Values are deterministic model outputs.
