@@ -7,7 +7,7 @@ state summaries, and convergence diagnostics. `study_manifest.json` and
 principal regression values.
 
 `trajectories/` contains the elevated baseline and three intervention time
-courses used in Figure 2. Every nonzero-flow report uses return fraction 1.0.
+courses used in Figures 2 and S3. Every nonzero-flow report uses return fraction 1.0.
 The files are preserved byte for byte from the verified study. Their original
 run metadata is retained rather than rewritten after moving the directory.
 

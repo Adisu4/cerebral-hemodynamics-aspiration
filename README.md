@@ -141,9 +141,9 @@ src/cerebral_hemodynamics_aspiration/
 
 data/
     reports/          89 converged simulation reports
-    trajectories/     Four trajectories used for the time-course figure
+    trajectories/     Four trajectories used for Figures 2 and S3
 figures/
-    supplementary/    Reference reproduction and parameter sensitivity
+    supplementary/    Reference reproduction, sensitivity, and resistance diagnostics
 tables/
     supplementary/    Complete aspiration results and model comparisons
 tests/
@@ -216,8 +216,10 @@ For the implemented TBI-like parameter state, the converged simulations give:
 Baseline ICP is 22.698 mmHg. Table 2 reports these nominal and maximum-rate
 results; supplementary Table S7 contains final ICP and ΔICP at all seven rates.
 Every intervention uses equal lower-SVC return and the final 120-s mean after
-convergence. The site/rate bar and line charts have been removed to avoid
-duplicating the table.
+convergence. Supplementary Figure S3 shows pressures and terminal resistance
+before and during aspiration; Table S9 reports actual convergence diagnostics
+for the baseline and all 28 primary interventions. The site/rate bar and line
+charts have been removed to avoid duplicating the table.
 
 These are deterministic model predictions rather than measured biological
 effects. The constructed TBI-like state and aspiration predictions require

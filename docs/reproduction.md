@@ -35,7 +35,8 @@ The generator reads saved outputs without rerunning the model. It checks the
 return condition, aspiration site, rate, primary solver, and convergence flags.
 Figures are vector PDFs and 600-dpi PNGs. The specified font is Arial; install
 Arial for an exact typographic match, otherwise Matplotlib uses a substitute.
-CSV tables retain nine decimal places; manuscript tables round to three.
+Outcome CSV tables retain nine decimal places; manuscript outcomes round to
+three. Convergence diagnostics use scientific notation.
 
 ## Manuscript displays
 
@@ -46,8 +47,10 @@ CSV tables retain nine decimal places; manuscript tables round to three.
 | Table 2 | `tables/table_2_icp_reduction` | Four sites at 240 and 480 mL/min |
 | Figure S1 | `figures/supplementary/figure_s1_reference_hemodynamics` | Published supine reference comparison |
 | Figure S2 | `figures/supplementary/figure_s2_parameter_sensitivity` | Matched-baseline one-at-a-time sensitivity |
+| Figure S3 | `figures/supplementary/figure_s3_terminal_resistance` | Pressure and terminal-resistance trajectories with branch identification |
 | Table S7 | `tables/supplementary/table_s7_aspiration_response` | All seven rates and four sites, final ICP and ΔICP |
 | Table S8 | `tables/supplementary/table_s8_model_comparison` | Primary, physiological, and fixed-resistance comparisons |
+| Table S9 | `tables/supplementary/table_s9_convergence` | Actual durations, final-window drift, pressure derivatives, and ICP temporal SD |
 
 Figure 1 is the model schematic retained in the manuscript. Main Table 1 and
 supplementary Tables S1–S6 document parameters, initial states, and site
@@ -57,7 +60,7 @@ command. The supplement is cited as Supplementary Material.
 The rate-response graph is intentionally omitted: its results are reported in
 Table 2 and Table S7. Numerical uncertainty is not inferred from repeated
 deterministic output samples. The four trajectory files in `data/trajectories/`
-are sufficient for Figure 2; all other generated displays use JSON reports.
+are sufficient for Figures 2 and S3; all other generated displays use JSON reports.
 
 `figures/provenance.json` records the generator and input/output hashes.
 `SHA256SUMS.txt` in each output directory checks the distributed artifacts.

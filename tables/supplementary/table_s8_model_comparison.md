@@ -6,4 +6,4 @@ Table S8. Model comparisons of ICP reduction at 240 mL/min.
 | Physiological baseline state | 0.507 | 0.183 | 0.144 | 0.110 |
 | Fixed terminal resistance | 2.007 | 0.251 | 0.116 | 0.091 |
 
-Values are ΔICP relative to the corresponding baseline without aspiration. The fixed-resistance comparison has a different baseline equilibrium.
+Values are ΔICP relative to the corresponding baseline without aspiration. The fixed-resistance comparison has a different baseline equilibrium. It tests sensitivity to the terminal-resistance law and does not simulate a transition into flow limitation.

@@ -308,6 +308,89 @@ def write_csv(path: Path, fields: list[str], rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
+def write_convergence_table(reports: dict, baseline: dict, output: Path) -> None:
+    """Report attained convergence diagnostics, not just acceptance limits."""
+    fields = ["site", "rate_ml_min", "duration_s", "icp_sd_mmhg",
+              "max_pressure_drift_mmhg_min", "max_pressure_derivative_mmhg_min"]
+    cases = [("Baseline", 0, baseline)] + [
+        (site, rate, reports[(site, rate)]) for site in SITES for rate in RATES
+    ]
+    rows = []
+    lines = ["Table S9. Convergence of the post-traumatic baseline and primary aspiration simulations.", "",
+             "| Site | Rate (mL/min) | Duration (s) | ICP SD (10⁻⁵ mmHg) | Maximum absolute drift (10⁻⁵ mmHg/min) | Maximum absolute derivative (10⁻⁵ mmHg/min) |",
+             "|---|---:|---:|---:|---:|---:|"]
+    for site, rate, report in cases:
+        stats = report["summary"]
+        if stats["window_s"] != 120.0 or not all(
+            check["passed"] for check in report["convergence_checks"][-2:]
+        ):
+            raise ValueError(f"{report['label']}: final-window convergence is inconsistent")
+        if report["domain"]["branches_seen"] != [0]:
+            raise ValueError(f"{report['label']}: resistance branch changed")
+        values = [stats["icp_std_mmhg"], stats["max_pressure_drift_mmhg_min"],
+                  stats["max_pressure_residual_mmhg_min"]]
+        rows.append(dict(zip(fields, [site, rate, int(report["duration_s"]),
+                                      *[f"{value:.12e}" for value in values]])))
+        lines.append(f"| {site} | {rate} | {report['duration_s']:.0f} | "
+                     + " | ".join(f"{value * 1e5:.3f}" for value in values) + " |")
+    lines += ["", "Baseline duration is the equilibration time before aspiration. Intervention durations are measured from aspiration onset and include the 60-s ramp. ICP SD is temporal standard deviation over the final 120 s, not biological variability. Drift is the largest absolute fitted slope among the 13 pressure states over that window; derivative is the largest absolute pressure derivative at the endpoint. All runs met all three convergence criteria in two consecutive 600-s segments. Pv > Pvs and Pv > ICP held throughout every primary aspiration run."]
+    write_csv(output / "table_s9_convergence.csv", fields, rows)
+    (output / "table_s9_convergence.md").write_bytes(("\n".join(lines) + "\n").encode("utf-8"))
+
+
+def plot_terminal_resistance(source: Source, output: Path) -> None:
+    """Show the saved pressure and resistance trajectories without resimulation."""
+    series = (("Pv", 240, "Pv", "-", "o"),
+              ("Pv", 480, "Pv480", "--", "s"),
+              ("Pvs", 240, "Pvs", "-.", "^"))
+    panels = (("Pic", "Intracranial pressure\n(mmHg)"),
+              ("Pv", "Cerebral venous pressure\n(mmHg)"),
+              ("Pvs", "Venous sinus pressure\n(mmHg)"),
+              ("Rvs", "Terminal resistance\n(mmHg s/mL)"))
+
+    def trajectory(label: str) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+        t, y, names = source.trajectory(label)
+        with np.load(source.trajectories / f"{label}.npz", allow_pickle=False) as data:
+            resistance = data["Rvs"].copy()
+            branches = data["branch_code"].copy()
+        if not np.all(branches == 0):
+            raise ValueError(f"{label}: expected the pressure-dependent resistance branch")
+        values = {name: y[names.index(name)] for name in ("Pic", "Pv", "Pvs")}
+        values["Rvs"] = resistance
+        if not np.all(values["Pv"] > values["Pvs"]):
+            raise ValueError(f"{label}: branch codes disagree with the saved pressures")
+        if not np.all(values["Pv"] > values["Pic"]):
+            raise ValueError(f"{label}: nonpositive cerebral venous transmural pressure")
+        return t, values
+
+    t_base, base = trajectory("tbi_baseline")
+    mask = t_base >= t_base[-1] - 1200.0
+    fig, axes = plt.subplots(2, 2, figsize=(7.1, 5.8), sharex=True)
+    for panel, (ax, (variable, ylabel)) in enumerate(zip(axes.flat, panels)):
+        ax.plot((t_base[mask] - t_base[-1]) / 60, base[variable][mask],
+                color="black", linewidth=2)
+        for site, rate, color, style, marker in series:
+            t, values = trajectory(f"dose_{site.lower()}_{rate}")
+            ax.plot(t / 60, values[variable], color=COLORS[color],
+                    linestyle=style, marker=marker, markevery=max(1, len(t) // 9),
+                    markersize=3.3, label=f"{site}, {rate} mL/min")
+        ax.axvline(0, color="#777777", linestyle=(0, (4, 3)), linewidth=1)
+        ax.set_ylabel(ylabel)
+        ax.set_xlim(-20, 183)
+        ax.set_xticks([0, 60, 120, 180])
+        ax.text(-.17, 1.04, chr(ord("A") + panel), transform=ax.transAxes,
+                weight="bold", fontsize=10)
+        finish_axes(ax)
+    for ax in axes[1]:
+        ax.set_xlabel("Time from aspiration onset (min)", fontsize=10)
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    fig.legend(handles, labels, frameon=False, loc="lower center",
+               bbox_to_anchor=(.52, .015), ncol=3)
+    fig.subplots_adjust(left=.11, right=.99, bottom=.16, top=.96,
+                        hspace=.25, wspace=.38)
+    save_figure(fig, output, "figure_s3_terminal_resistance")
+
+
 def write_primary_table(reports: dict, baseline_icp: float, output: Path) -> None:
     fields = ["site", "delta_icp_240_mmhg", "delta_icp_480_mmhg"]
     rows = []
@@ -366,7 +449,7 @@ def write_comparison_table(source: Source, primary: dict, baseline: dict,
             text.append(f"{delta:.3f}")
         rows.append(row)
         md.append("| " + " | ".join(text) + " |")
-    md += ["", "Values are ΔICP relative to the corresponding baseline without aspiration. The fixed-resistance comparison has a different baseline equilibrium."]
+    md += ["", "Values are ΔICP relative to the corresponding baseline without aspiration. The fixed-resistance comparison has a different baseline equilibrium. It tests sensitivity to the terminal-resistance law and does not simulate a transition into flow limitation."]
     write_csv(output / "table_s8_model_comparison.csv", fields, rows)
     (output / "table_s8_model_comparison.md").write_bytes(
         ("\n".join(md) + "\n").encode("utf-8"))
@@ -422,11 +505,13 @@ def cli(argv: list[str] | None = None) -> int:
     write_primary_table(primary, baseline_icp, table_dir)
     write_aspiration_table(primary, baseline_icp, table_dir / "supplementary")
     write_comparison_table(source, primary, baseline, table_dir / "supplementary")
+    write_convergence_table(primary, baseline, table_dir / "supplementary")
     plot_icp_response(source, primary, figure_dir, baseline_icp)
     plot_venous_pressures(primary, baseline, figure_dir)
     plot_reference_hemodynamics(source, figure_dir / "supplementary")
     nominal_delta = baseline_icp - icp(primary[("Pv", 240)])
     plot_parameter_sensitivity(sensitivity, nominal_delta, figure_dir / "supplementary")
+    plot_terminal_resistance(source, figure_dir / "supplementary")
 
     captions = (
         "Figure 2. ICP response after onset of venous aspiration. "
@@ -438,7 +523,12 @@ def cli(argv: list[str] | None = None) -> int:
         "Black bars show the published reference values; open circles show the model reproduction. This is a source-reference benchmark, not independent validation of the aspiration intervention.\n\n"
         "Figure S2. One-at-a-time sensitivity of ICP reduction during cerebral-vein aspiration at 240 mL/min. "
         "Open circles show tested parameter settings; horizontal segments span their deterministic outputs, and stars mark nominal settings. "
-        f"The dashed line marks the nominal {nominal_delta:.3f}-mmHg reduction. The ranges are not statistical uncertainty intervals.\n"
+        f"The dashed line marks the nominal {nominal_delta:.3f}-mmHg reduction. The ranges are not statistical uncertainty intervals.\n\n"
+        "Figure S3. Pressures and terminal cerebral-vein resistance before and during aspiration. "
+        "Panels show ICP (A), cerebral venous pressure Pv (B), venous sinus pressure Pvs (C), and terminal resistance Rvs (D). "
+        "The black traces show the final 20 min of the elevated baseline. Curves show cerebral-vein aspiration at 240 and 480 mL/min and venous-sinus aspiration at 240 mL/min, ending when convergence criteria were met. "
+        "Pv and Pvs in the legend identify aspiration sites. The vertical line marks aspiration onset; flow increases over 60 s. "
+        "The pressure-dependent branch (Pv > Pvs, with Pv > ICP) remained active throughout the displayed trajectories and all 28 primary aspiration runs. No transition to the other resistance branch occurred.\n"
     )
     (figure_dir / "captions.md").write_bytes(captions.encode("utf-8"))
     def files_in(directory: Path) -> dict[str, str]:
@@ -467,7 +557,7 @@ def cli(argv: list[str] | None = None) -> int:
         paths = [p for p in sorted(directory.rglob("*")) if p.is_file() and p.name != "SHA256SUMS.txt"]
         manifest = "\n".join(f"{sha256(p)}  {p.relative_to(directory).as_posix()}" for p in paths) + "\n"
         (directory / "SHA256SUMS.txt").write_bytes(manifest.encode("utf-8"))
-    print(f"Wrote Figures 2–3 and S1–S2 to {figure_dir}; Tables 2, S7, and S8 to {table_dir}")
+    print(f"Wrote Figures 2–3 and S1–S3 to {figure_dir}; Tables 2 and S7–S9 to {table_dir}")
     return 0
 
 

@@ -28,7 +28,7 @@ primary analysis.
 
 `data/reports/` contains the current converged reports. The study manifest and
 summary in `data/` describe the same reinfusion study. `data/trajectories/`
-contains the four time courses used in main Figure 2 and their checksums.
+contains the four time courses used in Figures 2 and S3 and their checksums.
 
 `figures.py` generates the figures and tables without altering scientific
 inputs. Its provenance manifest records the precise reports, trajectories,
