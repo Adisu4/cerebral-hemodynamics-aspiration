@@ -40,11 +40,10 @@ and flows reported by Gadda et al. (2015). This is an implementation-
 reproduction check, not independent biological validation of the aspiration
 model. Upright posture is not included in the maintained implementation.
 
-The repository retains the audited historical source and its SHA-256 manifest
-under `reference_implementation/`. The current publication workflow is in
-`src/cerebral_hemodynamics_aspiration/`; each saved report records its source
-hashes and numerical inputs. Regression tests compare the maintained equations
-with the archive and verify the current saved reports.
+The maintained implementation is in `src/cerebral_hemodynamics_aspiration/`.
+Saved reports record the numerical source hashes and every run input.
+Three frozen fixtures under `tests/reference/` support equation and trajectory
+regression checks; earlier study scripts and figures are retained in Git history.
 
 ## Installation
 
@@ -76,24 +75,23 @@ simulation reports plus the study manifest and summary:
 cerebral-hemodynamics-run --output-dir results/simulations
 ```
 
-Generate the selected main-text and Extended Data displays from the versioned
+Generate the manuscript and supplementary figures and tables from the versioned
 reference results:
 
 ```bash
 cerebral-hemodynamics-plot \
-  --results-dir reference_results/reports \
-  --output-dir figures
+  --results-dir data/reports \
+  --output-dir figures \
+  --tables-dir tables
 ```
 
 The command reads the four plotted trajectories from
-`reference_results/figure_data/`. To build from a fresh run, use
+`data/trajectories/`. To build from a fresh run, use
 `--results-dir results/simulations`; the trajectory directory then defaults to
 the same run directory. Plotting does not rerun the model. It produces vector
-PDFs and 600-dpi PNGs with Arial labels; the figures and tables are also
-versioned in `figures/`. Main Figure 1 (model schematic) and Table 1 (model
+PDFs and 600-dpi PNGs with Arial labels; current figures are versioned in `figures/`, and numerical tables in `tables/`. Main Figure 1 (model schematic) and Table 1 (model
 parameters) are manuscript artwork and are not produced by this plotting
-command. See [`figures/README.md`](figures/README.md) for the exact display
-mapping.
+command. See [reproduction instructions](docs/reproduction.md) for the complete display mapping.
 
 ## Python example
 
@@ -135,22 +133,27 @@ print(f"Predicted ICP reduction: {delta_icp:.2f} mmHg")
 
 ```text
 src/cerebral_hemodynamics_aspiration/
-    model.py            Governing equations and flow calculations
-    parameters.py       Physiological and numerical parameter sets
-    simulation.py       Integration, convergence, and result serialization
-    experiments.py      Dose-response, site-comparison, and sensitivity runs
-    visualization.py    Scientific visualization of saved results
+    model.py          Governing equations and flow calculations
+    parameters.py     Physiological and post-traumatic parameter sets
+    simulation.py     Integration, convergence, and result serialization
+    experiments.py    Baseline, aspiration, sensitivity, and solver runs
+    figures.py        Figures and tables from saved results
 
-reference_implementation/  Archived result-producing source and source manifest
-reference_results/         Saved simulation reports and aggregate data
-figures/                   Vector PDF and 600-dpi PNG figures
-tests/                     Equation, provenance, and regression tests
-docs/                      Model scope, provenance, and release notes
+data/
+    reports/          89 converged simulation reports
+    trajectories/     Four trajectories used for the time-course figure
+figures/
+    supplementary/    Reference reproduction and parameter sensitivity
+tables/
+    supplementary/    Complete aspiration results and model comparisons
+tests/
+    reference/        Frozen fixtures for regression tests
+docs/                 Reproduction, model scope, and provenance
 ```
 
-Development and reuse should use the modules under `src/`. The historical
-filenames in `reference_implementation/` are retained unchanged because their
-hashes are embedded in the saved results.
+The numerical modules retain their source hashes. Filenames describe their
+scientific role; figure and table numbers match the revised manuscript and
+supplement. Only the current displays are present on the main branch.
 
 ## Model states
 
@@ -203,13 +206,18 @@ units, branch conditions, and parameter provenance.
 
 For the implemented TBI-like parameter state, the converged simulations give:
 
-| Aspiration condition | ICP reduction (mmHg) |
-|---|---:|
-| Cerebral-vein node, 240 mL/min | 3.0328 |
-| Cerebral-vein node, 480 mL/min | 6.1330 |
-| Venous-sinus node, 240 mL/min | 0.2338 |
-| Bilateral J3 nodes, 240 mL/min | 0.1096 |
-| Bilateral J2 nodes, 240 mL/min | 0.0863 |
+| Aspiration site | ΔICP at 240 mL/min (mmHg) | ΔICP at 480 mL/min (mmHg) |
+|---|---:|---:|
+| Cerebral veins | 3.033 | 6.133 |
+| Venous sinus | 0.234 | 0.469 |
+| Bilateral J3 | 0.110 | 0.221 |
+| Bilateral J2 | 0.086 | 0.174 |
+
+Baseline ICP is 22.698 mmHg. Table 2 reports these nominal and maximum-rate
+results; supplementary Table S7 contains final ICP and ΔICP at all seven rates.
+Every intervention uses equal lower-SVC return and the final 120-s mean after
+convergence. The site/rate bar and line charts have been removed to avoid
+duplicating the table.
 
 These are deterministic model predictions rather than measured biological
 effects. The constructed TBI-like state and aspiration predictions require
@@ -219,24 +227,24 @@ independent experimental validation.
 
 The test suite checks:
 
-- equation-level parity with the archived result-producing implementation;
+- equation-level parity with the frozen reference fixtures;
 - mass balance and model-domain conditions;
 - convergence and terminal pressure residuals;
 - source and input fingerprints;
 - consistency of 89 saved simulation reports; and
 - independently solved local equilibria for the principal results.
 
-See [model scope and limitations](docs/MODEL_SCOPE_AND_LIMITATIONS.md) and
-[source provenance](docs/PROVENANCE.md) before interpreting or citing the
+See [model scope and limitations](docs/model_scope.md) and
+[source provenance](docs/provenance.md) before interpreting or citing the
 results.
 
 ## Scientific basis and citation
 
 The cerebral and venous model is based principally on:
 
-- Gadda G, et al. (2015), “A new hemodynamic model shows that temporal venous
-  stenosis can cause idiopathic intracranial hypertension,” *Acta
-  Neurochirurgica*.
+- Gadda G, et al. (2015), “A new hemodynamic model for the study of cerebral
+  venous outflow,” *American Journal of Physiology–Heart and Circulatory
+  Physiology* 308:H217–H231. [doi:10.1152/ajpheart.00469.2014](https://doi.org/10.1152/ajpheart.00469.2014).
 - Ursino and Lodi (1997), cerebral autoregulation modeling.
 - Marmarou et al. (1975), intracranial pressure-volume and CSF dynamics.
 

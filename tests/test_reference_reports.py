@@ -15,7 +15,7 @@ from cerebral_hemodynamics_aspiration.simulation import source_hashes
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORT_DIR = ROOT / "reference_results" / "reports"
+REPORT_DIR = ROOT / "data" / "reports"
 
 
 def _parameters(report: dict) -> ModelParameters:
@@ -59,7 +59,7 @@ def test_all_89_reports_are_converged_and_equation_consistent() -> None:
 
 def test_summary_csv_matches_all_referenced_reports() -> None:
     reports = {report["label"]: report for report in _reports()}
-    with (ROOT / "reference_results" / "study_summary.csv").open(
+    with (ROOT / "data" / "study_summary.csv").open(
         newline="", encoding="utf-8"
     ) as handle:
         rows = list(csv.DictReader(handle))
@@ -72,10 +72,10 @@ def test_summary_csv_matches_all_referenced_reports() -> None:
 
 def test_key_results_match_saved_manifest() -> None:
     study = json.loads(
-        (ROOT / "reference_results" / "study_manifest.json").read_text(encoding="utf-8")
+        (ROOT / "data" / "study_manifest.json").read_text(encoding="utf-8")
     )
     expected = json.loads(
-        (ROOT / "reference_results" / "key_results.json").read_text(encoding="utf-8")
+        (ROOT / "data" / "key_results.json").read_text(encoding="utf-8")
     )
     for key, value in study["key_results"].items():
         assert value == expected[key]

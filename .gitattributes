@@ -8,8 +8,8 @@
 *.txt text eol=lf
 
 # Saved run reports are machine-generated regression fixtures.
-reference_results/reports/*.json linguist-generated=true
-reference_results/study_manifest.json linguist-generated=true
+data/reports/*.json linguist-generated=true
+data/study_manifest.json linguist-generated=true
 
 # Preserve byte-for-byte provenance snapshots on every operating system.
-reference_implementation/*.py -text
+tests/reference/*.py -text

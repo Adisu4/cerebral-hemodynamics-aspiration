@@ -23,7 +23,7 @@ EXPECTED_ICP = {
 
 def _load(name: str) -> tuple[dict, ModelParameters]:
     report = json.loads(
-        (ROOT / "reference_results" / "reports" / f"{name}.json").read_text(
+        (ROOT / "data" / "reports" / f"{name}.json").read_text(
             encoding="utf-8"
         )
     )

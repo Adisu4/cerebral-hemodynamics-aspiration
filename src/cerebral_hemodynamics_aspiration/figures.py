@@ -1,4 +1,4 @@
-"""Build main-text and Extended Data displays from full-return run reports.
+"""Generate manuscript figures and tables from saved study results.
 
 This module reads saved simulations; it does not change or rerun the model.
 Every nonzero-flow report must document equal return to the lower SVC.
@@ -136,7 +136,7 @@ def save_figure(fig: plt.Figure, output: Path, stem: str) -> None:
     plt.close(fig)
 
 
-def figure_2(source: Source, output: Path) -> None:
+def plot_reference_hemodynamics(source: Source, output: Path) -> None:
     """Reproduce the published supine reference flows and pressures."""
     report = source.report("reference_baseline")
     flows = report["terminal_flows_ml_s"]
@@ -177,10 +177,10 @@ def figure_2(source: Source, output: Path) -> None:
     fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(.5, -.02),
                ncol=2, frameon=False)
     fig.tight_layout(rect=(0, .10, 1, 1), w_pad=2)
-    save_figure(fig, output, "extended_data_figure_01_reference_reproduction")
+    save_figure(fig, output, "figure_s1_reference_hemodynamics")
 
 
-def figure_3(source: Source, reports: dict, output: Path,
+def plot_icp_response(source: Source, reports: dict, output: Path,
              baseline_icp: float) -> None:
     t_base, y_base, names = source.trajectory("tbi_baseline")
     index = names.index("Pic")
@@ -227,37 +227,10 @@ def figure_3(source: Source, reports: dict, output: Path,
               ncol=3)
     finish_axes(ax)
     fig.subplots_adjust(bottom=0.28)
-    save_figure(fig, output, "figure_02_icp_time_course_svc_return")
+    save_figure(fig, output, "figure_2_icp_response")
 
 
-def figure_4(reports: dict, output: Path, baseline_icp: float) -> None:
-    fig, ax = plt.subplots(figsize=(7.1, 4.35))
-    bar_width = 11.5  # mL/min on the numerical flow-rate axis
-    bar_colors = {"Pv": "#3D7391", "Pvs": "#C28F3D",
-                  "J3": "#4C8A78", "J2": "#A46A8A"}
-    hatches = {"Pv": "", "Pvs": "//", "J3": "xx", "J2": ".."}
-    reductions = {}
-    for site_index, site in enumerate(SITES):
-        reductions[site] = [baseline_icp - icp(reports[(site, rate)])
-                            for rate in RATES]
-        offsets = (site_index - (len(SITES) - 1) / 2) * bar_width
-        ax.bar(np.asarray(RATES) + offsets, reductions[site],
-               width=bar_width * .88, color=bar_colors[site],
-               edgecolor=COLORS["ink"], linewidth=.65,
-               hatch=hatches[site], label=SITE_NAMES[site], zorder=2)
-    ax.set_ylim(0, max(max(values) for values in reductions.values()) * 1.08)
-    ax.set_xlim(28, 510)
-    ax.set_xticks(RATES)
-    ax.set_xlabel("Extraction and SVC-return rate (mL/min)")
-    ax.set_ylabel("ICP reduction, ΔICP (mmHg)")
-    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.22),
-              ncol=2)
-    finish_axes(ax)
-    fig.subplots_adjust(bottom=0.31)
-    save_figure(fig, output, "figure_03_flow_response_svc_return")
-
-
-def figure_5(reports: dict, baseline: dict, output: Path) -> None:
+def plot_venous_pressures(reports: dict, baseline: dict, output: Path) -> None:
     panels = ((2, "Cerebral veins (Pv)"), (3, "Venous sinus (Pvs)"))
     fig, axes = plt.subplots(1, 2, figsize=(7.1, 3.2))
     x = np.arange(len(SITES))
@@ -286,10 +259,10 @@ def figure_5(reports: dict, baseline: dict, output: Path) -> None:
                     va="bottom" if value >= 0 else "top", fontsize=8)
         finish_axes(ax)
     fig.tight_layout(w_pad=1.6)
-    save_figure(fig, output, "figure_04_venous_pressure_reductions_svc_return")
+    save_figure(fig, output, "figure_3_venous_pressure")
 
 
-def figure_6(sensitivity: dict, nominal_delta: float,
+def plot_parameter_sensitivity(sensitivity: dict, nominal_delta: float,
              output: Path) -> None:
     fig, ax = plt.subplots(figsize=(7.1, 4.6))
     all_outcomes = []
@@ -325,7 +298,7 @@ def figure_6(sensitivity: dict, nominal_delta: float,
                label="Nominal value")
     ax.legend(frameon=False, loc="lower right")
     fig.tight_layout()
-    save_figure(fig, output, "extended_data_figure_02_parameter_sensitivity_svc_return")
+    save_figure(fig, output, "figure_s2_parameter_sensitivity")
 
 
 def write_csv(path: Path, fields: list[str], rows: list[dict]) -> None:
@@ -335,33 +308,39 @@ def write_csv(path: Path, fields: list[str], rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
-def write_table_2(reports: dict, baseline_icp: float, output: Path) -> None:
-    fields = ["rate_ml_min"]
-    for site in SITES:
-        fields.extend((f"{site}_final_icp_mmhg", f"{site}_delta_icp_mmhg"))
+def write_primary_table(reports: dict, baseline_icp: float, output: Path) -> None:
+    fields = ["site", "delta_icp_240_mmhg", "delta_icp_480_mmhg"]
     rows = []
-    md = ["Extended Data Table 1. Final ICP and ICP reduction for complete lower-SVC return.",
-          f"Matched no-extraction TBI baseline ICP: {baseline_icp:.6f} mmHg.", "",
-          "| Rate (mL/min) | Cerebral vein final ICP | ΔICP | Venous sinus final ICP | ΔICP | J3 final ICP | ΔICP | J2 final ICP | ΔICP |",
-          "|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
+    md = ["Table 2. ICP reduction at the nominal and maximum aspiration rates.", "",
+          "| Aspiration site | ΔICP at 240 mL/min (mmHg) | ΔICP at 480 mL/min (mmHg) |",
+          "|---|---:|---:|"]
+    for site in SITES:
+        values = [baseline_icp - icp(reports[(site, rate)]) for rate in (240, 480)]
+        rows.append(dict(zip(fields, [site, *[f"{v:.9f}" for v in values]])))
+        md.append(f"| {SITE_NAMES[site]} | {values[0]:.3f} | {values[1]:.3f} |")
+    md += ["", f"ΔICP is the no-aspiration post-traumatic baseline ICP ({baseline_icp:.3f} mmHg) minus the final 120-s mean ICP. All aspiration runs used equal lower-SVC return. Values are deterministic model outputs."]
+    write_csv(output / "table_2_icp_reduction.csv", fields, rows)
+    (output / "table_2_icp_reduction.md").write_bytes(("\n".join(md) + "\n").encode("utf-8"))
+
+
+def write_aspiration_table(reports: dict, baseline_icp: float, output: Path) -> None:
+    fields = ["rate_ml_min", "site", "final_icp_mmhg", "delta_icp_mmhg"]
+    rows = []
+    md = ["Table S7. Final ICP and ICP reduction across aspiration rates and sites.", "",
+          "| Rate (mL/min) | Aspiration site | Final ICP (mmHg) | ΔICP (mmHg) |",
+          "|---:|---|---:|---:|"]
     for rate in RATES:
-        row = {"rate_ml_min": rate}
-        text = [str(rate)]
         for site in SITES:
             final = icp(reports[(site, rate)])
             delta = baseline_icp - final
-            row[f"{site}_final_icp_mmhg"] = f"{final:.9f}"
-            row[f"{site}_delta_icp_mmhg"] = f"{delta:.9f}"
-            text.extend((f"{final:.3f}", f"{delta:.3f}"))
-        rows.append(row)
-        md.append("| " + " | ".join(text) + " |")
-    md += ["", "Values are deterministic final 120-s mean ICP results. The extraction rate is returned in full to the lower-SVC state. ΔICP equals the matched no-extraction baseline minus final ICP."]
-    write_csv(output / "extended_data_table_01_dose_response_svc_return.csv", fields, rows)
-    (output / "extended_data_table_01_dose_response_svc_return.md").write_bytes(
-        ("\n".join(md) + "\n").encode("utf-8"))
+            rows.append(dict(zip(fields, [rate, site, f"{final:.9f}", f"{delta:.9f}"])))
+            md.append(f"| {rate} | {SITE_NAMES[site]} | {final:.3f} | {delta:.3f} |")
+    md += ["", f"Matched no-aspiration post-traumatic baseline ICP: {baseline_icp:.3f} mmHg. Final ICP is the mean over the final 120 s after convergence; ΔICP equals baseline minus final ICP. Each rate was simulated separately with equal lower-SVC return."]
+    write_csv(output / "table_s7_aspiration_response.csv", fields, rows)
+    (output / "table_s7_aspiration_response.md").write_bytes(("\n".join(md) + "\n").encode("utf-8"))
 
 
-def write_table_3(source: Source, primary: dict, baseline: dict,
+def write_comparison_table(source: Source, primary: dict, baseline: dict,
                   output: Path) -> None:
     comparisons = (
         ("Post-traumatic primary analysis", "tbi_baseline", "dose"),
@@ -370,7 +349,7 @@ def write_table_3(source: Source, primary: dict, baseline: dict,
     )
     fields = ["comparison", "baseline_icp_mmhg"] + [f"{site}_delta_icp_mmhg" for site in SITES]
     rows = []
-    md = ["Table 2. Model comparisons of ICP reduction at 240 mL/min with complete lower-SVC return.", "",
+    md = ["Table S8. Model comparisons of ICP reduction at 240 mL/min with complete lower-SVC return.", "",
           "| Comparison | Cerebral vein ΔICP | Venous sinus ΔICP | J3 ΔICP | J2 ΔICP |",
           "|---|---:|---:|---:|---:|"]
     for description, baseline_label, prefix in comparisons:
@@ -388,8 +367,8 @@ def write_table_3(source: Source, primary: dict, baseline: dict,
         rows.append(row)
         md.append("| " + " | ".join(text) + " |")
     md += ["", "Values are ΔICP relative to each comparison's matched no-extraction baseline. All aspiration cases use complete return to the lower-SVC state. The fixed-resistance comparison has a different baseline equilibrium."]
-    write_csv(output / "table_02_model_comparisons_svc_return.csv", fields, rows)
-    (output / "table_02_model_comparisons_svc_return.md").write_bytes(
+    write_csv(output / "table_s8_model_comparison.csv", fields, rows)
+    (output / "table_s8_model_comparison.md").write_bytes(
         ("\n".join(md) + "\n").encode("utf-8"))
 
 
@@ -410,85 +389,85 @@ def read_sensitivity(source: Source) -> dict[tuple[str, float], float]:
 def cli(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     root = Path(__file__).resolve().parents[2]
-    reference_reports = root / "reference_results" / "reports"
-    reference_trajectories = root / "reference_results" / "figure_data"
+    reference_reports = root / "data" / "reports"
+    reference_trajectories = root / "data" / "trajectories"
     parser.add_argument("--results-dir", type=Path, default=reference_reports,
                         help="Directory of converged JSON run reports")
     parser.add_argument("--trajectories-dir", type=Path, default=None,
-                        help="Directory of NPZ trajectories (defaults to the saved reference trajectories or the results directory)")
+                        help="NPZ trajectories; defaults to data/trajectories for reference reports, or the run directory")
     parser.add_argument("--output-dir", type=Path, default=root / "figures",
-                        help="Destination for main-text and Extended Data displays")
+                        help="Figure output directory")
+    parser.add_argument("--tables-dir", type=Path, default=root / "tables",
+                        help="Table output directory")
     args = parser.parse_args(argv)
     reports_dir = args.results_dir.resolve()
     trajectories_dir = (args.trajectories_dir.resolve() if args.trajectories_dir
                         else (reference_trajectories if reports_dir == reference_reports.resolve()
                               else reports_dir))
-    output_dir = args.output_dir.resolve()
+    figure_dir, table_dir = args.output_dir.resolve(), args.tables_dir.resolve()
     if not reports_dir.is_dir() or not trajectories_dir.is_dir():
         raise FileNotFoundError("The reports and trajectories directories are required")
-    output_dir.mkdir(parents=True, exist_ok=True)
+    for directory in (figure_dir, table_dir, figure_dir / "supplementary", table_dir / "supplementary"):
+        directory.mkdir(parents=True, exist_ok=True)
     set_style()
     source = Source(reports_dir, trajectories_dir)
-    figure_2(source, output_dir)
     baseline = source.report("tbi_baseline")
     baseline_icp = icp(baseline)
     primary = {
-        (site, rate): source.report(f"dose_{site.lower()}_{rate}",
-                                    site=site, rate=rate, intervention=True)
+        (site, rate): source.report(f"dose_{site.lower()}_{rate}", site=site,
+                                   rate=rate, intervention=True)
         for site in SITES for rate in RATES
     }
     sensitivity = read_sensitivity(source)
-    write_table_2(primary, baseline_icp, output_dir)
-    write_table_3(source, primary, baseline, output_dir)
-    figure_3(source, primary, output_dir, baseline_icp)
-    figure_4(primary, output_dir, baseline_icp)
-    figure_5(primary, baseline, output_dir)
+    write_primary_table(primary, baseline_icp, table_dir)
+    write_aspiration_table(primary, baseline_icp, table_dir / "supplementary")
+    write_comparison_table(source, primary, baseline, table_dir / "supplementary")
+    plot_icp_response(source, primary, figure_dir, baseline_icp)
+    plot_venous_pressures(primary, baseline, figure_dir)
+    plot_reference_hemodynamics(source, figure_dir / "supplementary")
     nominal_delta = baseline_icp - icp(primary[("Pv", 240)])
-    figure_6(sensitivity, nominal_delta, output_dir)
+    plot_parameter_sensitivity(sensitivity, nominal_delta, figure_dir / "supplementary")
 
     captions = (
-        "Figure 2. ICP response after onset of prescribed venous extraction with complete lower-SVC return. "
-        f"The black pre-intervention trace shows the final 20 min of the no-extraction post-traumatic baseline ({baseline_icp:.3f} mmHg). "
-        "Extraction and return flows ramp linearly over the first 60 s from t = 0; intervention curves show Pv at 240 and 480 mL/min and Pvs at 240 mL/min.\n\n"
-        "Figure 3. ICP reduction across extraction locations and prescribed flow rates with complete lower-SVC return. "
-        f"Each bar is the matched no-extraction baseline ({baseline_icp:.2f} mmHg) minus the final 120-s mean ICP of one deterministic simulation. "
-        "Extraction and return flow ramp over 60 s, then remain at the target rate until convergence. "
-        "The seven rates were simulated separately; bars do not represent changes over time.\n\n"
-        "Figure 4. Terminal venous-pressure reductions at 240 mL/min with complete lower-SVC return, relative to the matched no-extraction post-traumatic baseline. "
-        "Panels show cerebral venous pressure (A, Pv) and venous sinus pressure (B, Pvs).\n\n"
-        "Extended Data Figure 1. Reproduction of selected published supine baseline flows and pressures from Gadda et al. (2015). "
-        "Black bars show the published reference values; open circles show the current model reproduction.\n\n"
-        "Extended Data Figure 2. One-at-a-time sensitivity of ICP reduction during 240 mL/min cerebral-vein extraction with complete lower-SVC return. "
-        "Open circles show tested values; horizontal segments span each parameter's predicted reductions; "
-        f"stars mark nominal settings; the dashed line marks the nominal {nominal_delta:.3f}-mmHg reduction.\n"
+        "Figure 2. ICP response after onset of venous aspiration with equal lower-SVC return. "
+        f"The black trace shows the final 20 min of the elevated no-aspiration baseline ({baseline_icp:.3f} mmHg). "
+        "Aspiration and return ramp over 60 s; intervention curves show cerebral-vein aspiration at 240 and 480 mL/min and venous-sinus aspiration at 240 mL/min.\n\n"
+        "Figure 3. Venous pressure reductions at 240 mL/min with equal lower-SVC return. "
+        "Panels show the reductions from the matched no-aspiration baseline in cerebral venous pressure (A) and venous sinus pressure (B).\n\n"
+        "Figure S1. Reproduction of selected published supine hemodynamic values. "
+        "Black bars show the published reference values; open circles show the model reproduction. This is a source-reference benchmark, not independent validation of the aspiration intervention.\n\n"
+        "Figure S2. One-at-a-time sensitivity of ICP reduction during cerebral-vein aspiration at 240 mL/min with equal lower-SVC return. "
+        "Open circles show tested parameter settings; horizontal segments span their deterministic outputs, and stars mark nominal settings. "
+        f"The dashed line marks the nominal {nominal_delta:.3f}-mmHg reduction. The ranges are not statistical uncertainty intervals.\n"
     )
-    (output_dir / "figure_captions_svc_return.md").write_bytes(captions.encode("utf-8"))
-    inputs = {path.name: sha256(path) for path in sorted(source.used)}
-    outputs = {path.name: sha256(path) for path in sorted(output_dir.iterdir())
-               if path.is_file() and path.name not in
-               {"artifact_provenance.json", "SHA256SUMS.txt"}}
-    try:
-        results_label = reports_dir.relative_to(root).as_posix()
-    except ValueError:
-        results_label = str(reports_dir)
-    try:
-        trajectory_label = trajectories_dir.relative_to(root).as_posix()
-    except ValueError:
-        trajectory_label = str(trajectories_dir)
+    (figure_dir / "captions.md").write_bytes(captions.encode("utf-8"))
+    def files_in(directory: Path) -> dict[str, str]:
+        return {p.relative_to(directory).as_posix(): sha256(p)
+                for p in sorted(directory.rglob("*"))
+                if p.is_file() and p.name not in {"provenance.json", "SHA256SUMS.txt"}}
+    def source_label(directory: Path) -> str:
+        try:
+            return directory.relative_to(root).as_posix()
+        except ValueError:
+            return str(directory)
     provenance = {
-        "generator": "src/cerebral_hemodynamics_aspiration/visualization.py",
+        "generator": "src/cerebral_hemodynamics_aspiration/figures.py",
         "generator_sha256": sha256(Path(__file__).resolve()),
         "model_run_boundary_condition": "return_fraction=1.0; lower_SVC_state",
-        "reports_dir": results_label,
-        "trajectories_dir": trajectory_label,
+        "reports_dir": source_label(reports_dir),
+        "trajectories_dir": source_label(trajectories_dir),
         "baseline_icp_mmhg": baseline_icp,
         "nominal_pv240_delta_icp_mmhg": nominal_delta,
-        "inputs_sha256": inputs,
-        "outputs_sha256": outputs,
+        "inputs_sha256": {p.name: sha256(p) for p in sorted(source.used)},
+        "figures_sha256": files_in(figure_dir),
+        "tables_sha256": files_in(table_dir),
     }
-    (output_dir / "artifact_provenance.json").write_bytes(
-        (json.dumps(provenance, indent=2) + "\n").encode("utf-8"))
-    print(f"Wrote main Figures 2-4 and Table 2 plus Extended Data displays to {output_dir}")
+    (figure_dir / "provenance.json").write_bytes((json.dumps(provenance, indent=2) + "\n").encode("utf-8"))
+    for directory in (figure_dir, table_dir):
+        paths = [p for p in sorted(directory.rglob("*")) if p.is_file() and p.name != "SHA256SUMS.txt"]
+        manifest = "\n".join(f"{sha256(p)}  {p.relative_to(directory).as_posix()}" for p in paths) + "\n"
+        (directory / "SHA256SUMS.txt").write_bytes(manifest.encode("utf-8"))
+    print(f"Wrote Figures 2–3 and S1–S2 to {figure_dir}; Tables 2, S7, and S8 to {table_dir}")
     return 0
 
 

@@ -1,7 +1,8 @@
 include LICENSE
 include README.md
-include reference_requirements.txt
+include requirements-reproduction.txt
 recursive-include docs *.md
-recursive-include reference_implementation *.py *.md *.json
-recursive-include reference_results *.json *.csv
-recursive-include tests *.py
+recursive-include data *.json *.csv *.npz *.txt *.md
+recursive-include figures *.pdf *.png *.json *.txt *.md
+recursive-include tables *.csv *.txt *.md
+recursive-include tests *.py *.md *.json

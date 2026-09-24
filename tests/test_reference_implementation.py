@@ -21,7 +21,7 @@ from cerebral_hemodynamics_aspiration.parameters import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REFERENCE_SOURCE = ROOT / "reference_implementation"
+REFERENCE_SOURCE = ROOT / "tests" / "reference"
 
 
 def _load_module(name: str, path: Path):
@@ -35,14 +35,14 @@ def _load_module(name: str, path: Path):
 
 
 source_parameters = _load_module(
-    "publication_parameters", REFERENCE_SOURCE / "publication_parameters.py"
+    "publication_parameters", REFERENCE_SOURCE / "parameters.py"
 )
-source_model = _load_module("publication_model", REFERENCE_SOURCE / "publication_model.py")
-source_runner = _load_module("run_publication", REFERENCE_SOURCE / "run_publication.py")
+source_model = _load_module("publication_model", REFERENCE_SOURCE / "model.py")
+source_runner = _load_module("run_publication", REFERENCE_SOURCE / "simulation.py")
 
 
 def test_archived_source_hashes() -> None:
-    manifest = json.loads((REFERENCE_SOURCE / "SOURCE_MANIFEST.json").read_text(encoding="utf-8"))
+    manifest = json.loads((REFERENCE_SOURCE / "source_manifest.json").read_text(encoding="utf-8"))
     for filename, expected in manifest["files"].items():
         actual = hashlib.sha256((REFERENCE_SOURCE / filename).read_bytes()).hexdigest()
         assert actual == expected
@@ -69,7 +69,7 @@ def test_model_evaluation_matches_archived_source_exactly() -> None:
     ]
     for name in report_names:
         report = json.loads(
-            (ROOT / "reference_results" / "reports" / f"{name}.json").read_text(
+            (ROOT / "data" / "reports" / f"{name}.json").read_text(
                 encoding="utf-8"
             )
         )

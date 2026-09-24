@@ -44,7 +44,7 @@ jobs:
           cache: pip
       - run: python -m pip install --upgrade pip build
       - run: python -m build
-      - run: python -m pip install -r reference_requirements.txt pytest==9.1.1
+      - run: python -m pip install -r requirements-reproduction.txt pytest==9.1.1
       - run: python -m pip install --no-deps dist/*.whl
       - run: python -m pytest
       - run: cerebral-hemodynamics-run --help
@@ -58,9 +58,9 @@ jobs:
           with tarfile.open(archive, "r:gz") as handle:
               names = handle.getnames()
           required_suffixes = (
-              "reference_implementation/SOURCE_MANIFEST.json",
-              "reference_results/study_manifest.json",
-              "docs/MODEL_SCOPE_AND_LIMITATIONS.md",
+              "tests/reference/source_manifest.json",
+              "data/study_manifest.json",
+              "docs/model_scope.md",
               "tests/test_reference_implementation.py",
           )
           for suffix in required_suffixes:
