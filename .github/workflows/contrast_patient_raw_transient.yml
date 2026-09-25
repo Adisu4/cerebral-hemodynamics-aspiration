@@ -1,0 +1,39 @@
+name: Raw patient pulsatility transient
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "analysis/contrast_patient_raw_transient.py"
+      - ".github/workflows/contrast_patient_raw_transient.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  raw-patient:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e .
+      - name: Download verified CONTRAST archive
+        run: |
+          mkdir -p external_data results/raw_patient_transient
+          curl -L --fail --retry 5 --retry-delay 5 -o external_data/CONTRAST.tgz "https://zenodo.org/records/4992130/files/CONTRAST.tgz?download=1"
+          echo "72908ccf181fb10206e1142cdf7dccb7  external_data/CONTRAST.tgz" | md5sum -c -
+      - name: Run raw CON634 transient
+        run: |
+          python analysis/contrast_patient_raw_transient.py --archive external_data/CONTRAST.tgz --output-dir results/raw_patient_transient
+      - name: Upload raw-patient outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-patient-pulsatility-transient
+          path: results/raw_patient_transient/
+          if-no-files-found: error
+          retention-days: 14

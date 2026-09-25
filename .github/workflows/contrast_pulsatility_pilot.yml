@@ -1,0 +1,70 @@
+name: CONTRAST pulsatility pilot
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "analysis/contrast_pulsatility_pilot.py"
+      - ".github/workflows/contrast_pulsatility_pilot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: python -m pip install -e .
+      - name: Download CONTRAST archive
+        run: |
+          mkdir -p external_data results/contrast_pulsatility_pilot
+          curl -L --fail --retry 5 --retry-delay 5 -o external_data/CONTRAST.tgz "https://zenodo.org/records/4992130/files/CONTRAST.tgz?download=1"
+          echo "72908ccf181fb10206e1142cdf7dccb7  external_data/CONTRAST.tgz" | md5sum -c -
+      - name: Inspect archive layout
+        run: |
+          echo "FIRST MEMBERS"
+          tar -tzf external_data/CONTRAST.tgz | head -40
+          echo "FIRST CSV/TXT MEMBER"
+          first=$(tar -tzf external_data/CONTRAST.tgz | grep -Ei '\.(csv|txt)$' | head -1)
+          echo "$first"
+          if [ -n "$first" ]; then tar -xOzf external_data/CONTRAST.tgz "$first" | head -12; fi
+      - name: Inspect first traces numerically
+        run: |
+          python - <<'PY'
+          import tarfile,csv,io,numpy as np
+          from scipy.signal import find_peaks
+          with tarfile.open("external_data/CONTRAST.tgz","r:gz") as tar:
+              names=[n for n in tar.getnames() if n.lower().endswith(".csv")][:5]
+              for n in names:
+                  fh=tar.extractfile(n)
+                  r=csv.reader(io.TextIOWrapper(fh,encoding="utf-8"))
+                  h=next(r); x=[]
+                  for row in r:
+                      if len(x)>=12000: break
+                      x.append(float(row[0])/10)
+                  x=np.array(x)
+                  for fs in (100,200):
+                      s=x[:int(60*fs)]
+                      peaks,_=find_peaks(s,distance=int(.45*fs),prominence=8)
+                      rr=np.diff(peaks)/fs
+                      hr=(60/np.median(rr)) if len(rr) else np.nan
+                      print(n,h,"fs",fs,"n",len(s),"min",s.min(),"max",s.max(),"mean",s.mean(),"peaks",len(peaks),"hr",hr)
+          PY
+      - name: Run isolated two-condition pilot
+        run: |
+          python analysis/contrast_pulsatility_pilot.py --archive external_data/CONTRAST.tgz --output-dir results/contrast_pulsatility_pilot
+      - name: Upload outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contrast-pulsatility-pilot
+          path: results/contrast_pulsatility_pilot/
+          if-no-files-found: warn
+          retention-days: 14
