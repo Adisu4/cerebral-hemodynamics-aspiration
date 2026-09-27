@@ -17,6 +17,8 @@ from matplotlib import font_manager
 import matplotlib.pyplot as plt
 import numpy as np
 
+from . import schematic
+
 
 RATES = (60, 120, 180, 240, 300, 360, 480)
 SITES = ("Pv", "Pvs", "J3", "J2")
@@ -506,6 +508,7 @@ def cli(argv: list[str] | None = None) -> int:
     write_aspiration_table(primary, baseline_icp, table_dir / "supplementary")
     write_comparison_table(source, primary, baseline, table_dir / "supplementary")
     write_convergence_table(primary, baseline, table_dir / "supplementary")
+    schematic.plot_model_schematic(figure_dir)
     plot_icp_response(source, primary, figure_dir, baseline_icp)
     plot_venous_pressures(primary, baseline, figure_dir)
     plot_reference_hemodynamics(source, figure_dir / "supplementary")
@@ -514,6 +517,7 @@ def cli(argv: list[str] | None = None) -> int:
     plot_terminal_resistance(source, figure_dir / "supplementary")
 
     captions = (
+        schematic.SCHEMATIC_CAPTION + "\n\n" +
         "Figure 2. ICP response after onset of venous aspiration. "
         f"The black trace shows the final 20 min of the elevated no-aspiration baseline ({baseline_icp:.3f} mmHg). "
         "Aspiration flow increases linearly over 60 s; intervention curves show cerebral-vein aspiration at 240 and 480 mL/min and venous-sinus aspiration at 240 mL/min.\n\n"
@@ -543,6 +547,12 @@ def cli(argv: list[str] | None = None) -> int:
     provenance = {
         "generator": "src/cerebral_hemodynamics_aspiration/figures.py",
         "generator_sha256": sha256(Path(__file__).resolve()),
+        "schematic_generator": "src/cerebral_hemodynamics_aspiration/schematic.py",
+        "schematic_generator_sha256": sha256(Path(schematic.__file__).resolve()),
+        "schematic_model_sources_sha256": {
+            f"src/cerebral_hemodynamics_aspiration/{name}": sha256(Path(__file__).with_name(name))
+            for name in ("model.py", "parameters.py")
+        },
         "model_run_boundary_condition": "return_fraction=1.0; lower_SVC_state",
         "reports_dir": source_label(reports_dir),
         "trajectories_dir": source_label(trajectories_dir),
@@ -557,7 +567,7 @@ def cli(argv: list[str] | None = None) -> int:
         paths = [p for p in sorted(directory.rglob("*")) if p.is_file() and p.name != "SHA256SUMS.txt"]
         manifest = "\n".join(f"{sha256(p)}  {p.relative_to(directory).as_posix()}" for p in paths) + "\n"
         (directory / "SHA256SUMS.txt").write_bytes(manifest.encode("utf-8"))
-    print(f"Wrote Figures 2–3 and S1–S3 to {figure_dir}; Tables 2 and S7–S9 to {table_dir}")
+    print(f"Wrote Figures 1–3 and S1–S3 to {figure_dir}; Tables 2 and S7–S9 to {table_dir}")
     return 0
 
 

@@ -31,8 +31,7 @@ summary in `data/` describe the same reinfusion study. `data/trajectories/`
 contains the four time courses used in Figures 2 and S3 and their checksums.
 
 `figures.py` generates the figures and tables without altering scientific
-inputs. Its provenance manifest records the precise reports, trajectories,
-generator, and display files used. The main results appear in Table 2; the
+inputs. Figure 1 is drawn by `schematic.py` to show the implemented topology, including distinct cerebral venous and intracranial pressure states and equal lower-SVC return. The provenance manifest records both drawing modules, the model sources used for the schematic, and the precise reports, trajectories, and display files used. The main results appear in Table 2; the
 complete rate-by-site data appear in supplementary Table S7.
 
 The supine reference reproduction checks implementation against published

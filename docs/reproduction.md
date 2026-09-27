@@ -42,6 +42,7 @@ three. Convergence diagnostics use scientific notation.
 
 | Display | File | Content |
 |---|---|---|
+| Figure 1 | `figures/figure_1_model_schematic` | Implemented compartments, connections, aspiration sites, and equal lower-SVC return |
 | Figure 2 | `figures/figure_2_icp_response` | Elevated baseline, aspiration onset, and convergence |
 | Figure 3 | `figures/figure_3_venous_pressure` | Venous pressure reductions at 240 mL/min |
 | Table 2 | `tables/table_2_icp_reduction` | Four sites at 240 and 480 mL/min |
@@ -52,7 +53,7 @@ three. Convergence diagnostics use scientific notation.
 | Table S8 | `tables/supplementary/table_s8_model_comparison` | Primary, physiological, and fixed-resistance comparisons |
 | Table S9 | `tables/supplementary/table_s9_convergence` | Actual durations, final-window drift, pressure derivatives, and ICP temporal SD |
 
-Figure 1 is the model schematic retained in the manuscript. Main Table 1 and
+Figure 1 is generated from the topology documented in `schematic.py`, checked against the governing equations in `model.py`. Main Table 1 and
 supplementary Tables S1–S6 document parameters, initial states, and site
 definitions in the Word documents. They are not outputs of the plotting
 command. The supplement is cited as Supplementary Material.
@@ -60,9 +61,9 @@ command. The supplement is cited as Supplementary Material.
 The rate-response graph is intentionally omitted: its results are reported in
 Table 2 and Table S7. Numerical uncertainty is not inferred from repeated
 deterministic output samples. The four trajectory files in `data/trajectories/`
-are sufficient for Figures 2 and S3; all other generated displays use JSON reports.
+are sufficient for Figures 2 and S3; the remaining numerical displays use JSON reports. Figure 1 requires no simulation output.
 
-`figures/provenance.json` records the generator and input/output hashes.
+`figures/provenance.json` records the generator and input/output hashes, including the schematic source and the model files it depicts.
 `SHA256SUMS.txt` in each output directory checks the distributed artifacts.
 The test suite checks all saved reports against the current equations and
 independently solves the principal equilibria.

@@ -1,6 +1,12 @@
 {
   "generator": "src/cerebral_hemodynamics_aspiration/figures.py",
-  "generator_sha256": "b889effb81cbc7512fb97cde837f8cf74261a195f5674256df00074a2a25c780",
+  "generator_sha256": "4b0a9136a895af1e69feb3fb94fbd63183fcd55732ef60186a95ffa43dd77ff8",
+  "schematic_generator": "src/cerebral_hemodynamics_aspiration/schematic.py",
+  "schematic_generator_sha256": "e22427ac6b2bec7dc0974b663e9602c0d6f0646b91353af9ffbb392b0e7a30e5",
+  "schematic_model_sources_sha256": {
+    "src/cerebral_hemodynamics_aspiration/model.py": "d16a68de4cea213bd720d1b4cc5a83801c40a3d767debbf14d67623453b0ed82",
+    "src/cerebral_hemodynamics_aspiration/parameters.py": "b6f08b84ed533b3ccebc6e8f19cb9eb27d4708f3f66b4b1bcf626584431013e1"
+  },
   "model_run_boundary_condition": "return_fraction=1.0; lower_SVC_state",
   "reports_dir": "data/reports",
   "trajectories_dir": "data/trajectories",
@@ -98,7 +104,9 @@
     "tbi_baseline.npz": "5c9e656b6b5b41e9780d3a08326a210266a38c447fe7bddf381c20ca125bb7ee"
   },
   "figures_sha256": {
-    "captions.md": "ef55754146eec3d2125233ea6f9485251f3750db11c1b1f8796eb76b6ccfff67",
+    "captions.md": "ae85c80a84d4d529217313f4e65825595e00d1a8e98a346e76afb46b9259dcee",
+    "figure_1_model_schematic.pdf": "d0c7ad0d59e06941f0c091e5c1c600c95d38494a10649f83f3d1dd06a4f8f256",
+    "figure_1_model_schematic.png": "d31dfb8ebb2a72c1a1f3c08fbb5b27bdf9ce5ab9efbdb7f9c37af1edf59478b8",
     "figure_2_icp_response.pdf": "b53526827e82b2960f7f8900676f73b0d9063079357314cc8f2b00d4bda602b6",
     "figure_2_icp_response.png": "030aebc8cd5a166690263050522cfc420656f00b0da846de99129ae8181d1a91",
     "figure_3_venous_pressure.pdf": "f49629385ba5743fc32e4df4d0606f91de9c7ed0dae6e65ce67d96764174b1d6",
