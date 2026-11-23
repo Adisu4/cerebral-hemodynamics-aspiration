@@ -250,8 +250,9 @@ The cerebral and venous model is based principally on:
 - Marmarou et al. (1975), intracranial pressure-volume and CSF dynamics.
 
 The venous-aspiration extension is being prepared for publication by Adisu
-Mengesha Assefa and collaborators. Add a formal software citation only after
-the author list and manuscript citation have been approved by all contributors.
+Mengesha Assefa and collaborators. To cite the software, use the Cite this
+repository button on GitHub (generated from CITATION.cff) or the Zenodo DOI
+of the release you used, and please also cite the article once published.
 
 ## Contact
 
