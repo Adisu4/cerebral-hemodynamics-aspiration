@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "cerebral-hemodynamics-aspiration: lumped-parameter model of cerebral venous aspiration and intracranial pressure"
 type: software
-version: "1.0.0"
+version: "2.0.0"
 authors: [{family-names: "Assefa", given-names: "Adisu Mengesha", affiliation: "Department of Biomechanics, University of Nebraska at Omaha"}]
 repository-code: "https://github.com/Adisu4/cerebral-hemodynamics-aspiration"
 license: MIT
