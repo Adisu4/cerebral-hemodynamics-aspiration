@@ -1,4 +1,4 @@
-# Aspiration along the cerebral venous outflow pathway: an intracranial pressure model
+# Mathematical modeling of the effects of venous aspiration site and flow rate in post-traumatic intracranial hypertension
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24457183.svg)](https://doi.org/10.5281/zenodo.24457183)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -116,8 +116,9 @@ docs/                                   reproduction guide, model scope, provena
 
 ## Citation
 
-> Assefa AM. cerebral-hemodynamics-aspiration: lumped-parameter model of cerebral
-> venous aspiration and intracranial pressure [software]. Zenodo; 2026.
+> Assefa AM, Kargarbahrkhazar B, Sattur MG, Srinivasan S, Jadidi M. Mathematical
+> modeling of the effects of venous aspiration site and flow rate in post-traumatic
+> intracranial hypertension: model code [software]. Zenodo; 2026.
 > https://doi.org/10.5281/zenodo.24457183
 
 ## References
@@ -141,8 +142,8 @@ docs/                                   reproduction guide, model scope, provena
 Supported in part by the National Institute of General Medical Sciences of the
 National Institutes of Health under award number P20GM152301. Developed in the
 Department of Biomechanics, University of Nebraska at Omaha, under the supervision
-of Prof. Majid Jadidi, with clinical input from Dr. Mithun G. Sattur, Department of
-Neurosurgery, University of Nebraska Medical Center.
+of Prof. Majid Jadidi, in collaboration with Dr. Mithun G. Sattur and Dr. Siddharth
+Srinivasan, Department of Neurosurgery, University of Nebraska Medical Center.
 
 ## License
 

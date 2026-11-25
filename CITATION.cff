@@ -1,10 +1,37 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
-title: "cerebral-hemodynamics-aspiration: lumped-parameter model of cerebral venous aspiration and intracranial pressure"
+title: "Mathematical modeling of the effects of venous aspiration site and flow rate in post-traumatic intracranial hypertension: model code"
 type: software
-version: "2.0.0"
-authors: [{family-names: "Assefa", given-names: "Adisu Mengesha", affiliation: "Department of Biomechanics, University of Nebraska at Omaha"}]
+version: "2.0.1"
+authors:
+  - family-names: Assefa
+    given-names: Adisu Mengesha
+    affiliation: "Department of Biomechanics, University of Nebraska at Omaha"
+  - family-names: Kargarbahrkhazar
+    given-names: Bahman
+    affiliation: "Department of Biomechanics, University of Nebraska at Omaha"
+  - family-names: Sattur
+    given-names: Mithun G.
+    affiliation: "Department of Neurosurgery, University of Nebraska Medical Center"
+  - family-names: Srinivasan
+    given-names: Siddharth
+    affiliation: "Department of Neurosurgery, University of Nebraska Medical Center"
+  - family-names: Jadidi
+    given-names: Majid
+    affiliation: "Department of Biomechanics, University of Nebraska at Omaha"
 repository-code: "https://github.com/Adisu4/cerebral-hemodynamics-aspiration"
 license: MIT
-abstract: "Python implementation of a lumped-parameter model of intracranial hemodynamics, cerebrospinal fluid dynamics, and extracranial venous drainage, extending the models of Ursino and Lodi and Gadda et al., used to simulate flow-controlled aspiration at different locations along the cerebral venous outflow pathway in post-traumatic intracranial hypertension."
-keywords: ["intracranial pressure", "cerebral venous outflow", "lumped-parameter model", "Starling resistor", "venous aspiration", "traumatic brain injury"]
+abstract: >-
+  Python implementation of a lumped-parameter model of intracranial
+  hemodynamics, cerebrospinal fluid dynamics, and extracranial venous
+  drainage, extending the models of Ursino and Lodi and Gadda et al., used to
+  simulate flow-controlled aspiration at different sites and flow rates along
+  the cerebral venous outflow pathway in post-traumatic intracranial
+  hypertension.
+keywords:
+  - intracranial pressure
+  - cerebral venous outflow
+  - lumped-parameter model
+  - Starling resistor
+  - venous aspiration
+  - traumatic brain injury
