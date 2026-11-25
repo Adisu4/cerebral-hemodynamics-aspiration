@@ -3,6 +3,7 @@ message: "If you use this software, please cite it using the metadata below."
 title: "Mathematical modeling of the effects of venous aspiration site and flow rate in post-traumatic intracranial hypertension: model code"
 type: software
 version: "2.0.1"
+doi: "10.5281/zenodo.24457183"
 authors:
   - family-names: Assefa
     given-names: Adisu Mengesha
