@@ -1,0 +1,42 @@
+name: CHARIS1 validation pilot
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "analysis/charis1_validation_pilot.py"
+      - ".github/workflows/charis1_validation_pilot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  charis1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e .
+      - name: Download CHARIS1 raw WFDB signal
+        run: |
+          mkdir -p external_data results/charis1_validation
+          curl -L --fail --retry 5 --retry-delay 5 -o external_data/charis1.dat "https://physionet-open.s3.amazonaws.com/charisdb/1.0.0/charis1.dat"
+          curl -L --fail --retry 5 --retry-delay 5 -o external_data/charis1.hea "https://physionet-open.s3.amazonaws.com/charisdb/1.0.0/charis1.hea"
+          cat external_data/charis1.hea
+      - name: Select raw seven-cycle segment and run validation plus aspiration
+        run: |
+          python analysis/charis1_validation_pilot.py --dat external_data/charis1.dat --output-dir results/charis1_validation
+      - name: Upload outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: charis1-validation-pilot
+          path: results/charis1_validation/
+          if-no-files-found: error
+          retention-days: 14
+
+# revision: precondition
